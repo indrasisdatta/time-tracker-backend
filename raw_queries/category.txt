@@ -1,0 +1,66 @@
+CATEGORY QUERIES
+____________________________________________________________________________________
+
+1. Insert new category with multiple sub-categories 
+db.categories.insert({
+  name: "CTS",
+  description: "CTS Office",
+  subCategories: [
+    { _id: new ObjectId(), name: "Official" }
+  ]
+})
+____________________________________________________________________________________
+
+2. Update category and sub-categories 
+db.categories.updateOne(
+    { _id : ObjectId("64b8af518d5261063b805d4c") },
+    {
+        $set: {
+            name: "Cognizant",
+            description: "CTS Official",
+            subCategories: [
+                { _id : ObjectId("64b8af518d5261063b805d4b"), name: "Official Task" },
+                { _id: new ObjectId(), name: "Verizon" }
+            ]
+        }
+    }    
+)
+____________________________________________________________________________________
+
+3. Delete category 
+db.categories.deleteOne({_id : ObjectId("64b76d0838bd0aa97dd95e13")})
+
+4. Add new sub-category 
+db.categories.updateOne(
+    { _id : ObjectId("64b8af518d5261063b805d4c") },
+    {
+        $push: {
+            subCategories: {
+                _id: new ObjectId(), name: "Citi Bank"
+            } 
+        }
+    }
+)
+____________________________________________________________________________________
+
+5. Update sub-category 
+db.categories.updateOne(
+    { "subCategories._id": ObjectId("64b8b0e48d5261063b805d4f") },
+    {
+        $set: {
+            "subCategories.$.name": "VZ"
+        }
+    }
+)
+____________________________________________________________________________________
+
+6. Delete sub-category 
+db.categories.updateOne(
+    { _id : ObjectId("64b8af518d5261063b805d4c") },
+    {
+        $pull: {
+            subCategories: {_id: new ObjectId("64b8b3bd8d5261063b805d50")} 
+        }
+    }
+)
+____________________________________________________________________________________

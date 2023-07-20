@@ -15,3 +15,26 @@ export const getCategories = async (
     res.status(500).json({ status: API_STATUS.ERROR, err: error });
   }
 };
+
+export const addCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    res.status(200).json({ status: API_STATUS.SUCCESS, data: 123 });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+  } catch (e) {
+    next(e);
+  }
+};
