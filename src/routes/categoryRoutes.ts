@@ -4,18 +4,12 @@ import {
   getCategories,
   updateCategory,
 } from "../controllers/categoryController";
-import {
-  validateAddCategory,
-  validationMiddleware,
-} from "../validators/validationMiddleware";
+import { validationMiddleware } from "../validators/validationMiddleware";
 
 const router = Router();
 
 router.get("/", getCategories);
-// router.post("/", validateAddCategory, addCategory);
-
-router.post("/", validationMiddleware("addCategory"), addCategory);
-
-router.put("/:catId", updateCategory);
+router.post("/", validationMiddleware("category"), addCategory);
+router.put("/:catId", validationMiddleware("category"), updateCategory);
 
 export default router;

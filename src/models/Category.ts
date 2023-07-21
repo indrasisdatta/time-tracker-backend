@@ -1,15 +1,20 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, Model, Schema, model } from "mongoose";
 
-interface ISubCategory extends Document {
+export interface ISubCategory extends Document {
   name: string;
   description?: string;
 }
 
-interface ICategory extends Document {
+export interface ICategory extends Document {
+  _id?: string;
   name: string;
   description?: string;
   subCategories?: ISubCategory[];
 }
+
+// export interface iCategoryRequest extends ICategory, Document {
+//   isCategoryNameUnique(name: string): Promise<boolean>;
+// }
 
 const categorySchema = new Schema(
   {
@@ -17,6 +22,7 @@ const categorySchema = new Schema(
     description: { type: String },
     subCategories: [
       new Schema<ISubCategory>({
+        _id: { type: Schema.ObjectId },
         name: { type: String, required: true, unique: true },
         description: { type: String },
       }),
@@ -25,4 +31,17 @@ const categorySchema = new Schema(
   { timestamps: true }
 );
 
-export default model<ICategory>("Category", categorySchema);
+categorySchema.static(
+  "isCategoryNameUnique",
+  async function (name: string): Promise<boolean> {
+    const existingCategory: ICategory = await this.findOne({ name });
+    return !existingCategory;
+  }
+);
+
+export const Category: Model<ICategory> = model<ICategory>(
+  "Category",
+  categorySchema
+);
+
+export default Category;
