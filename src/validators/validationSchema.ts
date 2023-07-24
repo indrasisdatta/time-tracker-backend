@@ -28,7 +28,7 @@ export const categorySchema = Joi.object({
       "any.required": "Category name is required", // name is not passed at all
       "string.empty": "Category name is required", // name is passed as blank
     }),
-  description: Joi.string().optional(),
+  description: Joi.string().optional().allow(null, ""),
   subCategories: Joi.array()
     .min(1)
     .items(

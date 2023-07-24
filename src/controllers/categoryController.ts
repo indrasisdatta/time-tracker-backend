@@ -61,9 +61,9 @@ export const updateCategory = async (
     existingCat.description = description;
     if (subCat && subCat.length > 0) {
       /* Loop through newly added sub categories */
-      existingCat.subCategories = subCat.map((newSubCat: ISubCategory) => {
+      const tempSubCat = subCat.map((newSubCat: ISubCategory) => {
         let existingSubCat = existingCat.subCategories?.find(
-          (oldSubCat) => oldSubCat._id === newSubCat._id
+          (oldSubCat) => oldSubCat.id.toString() === newSubCat._id
         );
         /* If id is passed and subcategory already exists, then edit it */
         if (existingSubCat) {
@@ -76,6 +76,7 @@ export const updateCategory = async (
         /* Add subcategory */
         return newSubCat;
       });
+      existingCat.subCategories = tempSubCat;
     }
 
     const cat = await existingCat.save();
@@ -87,15 +88,3 @@ export const updateCategory = async (
     next(e);
   }
 };
-
-/**
- * TODO:
- * Add, edit testing
- * 1. Edit - even if existing subcat with _id is sent, it still creates new _id
- *
- * 2. Add, Edit - For both category and subcategory -
- * If description is sent "" - it gives validation error.
- * Works if no description is passed
- *
- * In sub cat, if _id is not supplied, add it
- */
