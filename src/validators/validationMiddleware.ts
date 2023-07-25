@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { categorySchema } from "./validationSchema";
 import { API_STATUS } from "../config/constants";
+import { logger } from "../utils/logger";
 
 export const validationMiddleware = (op: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -23,9 +24,9 @@ export const validationMiddleware = (op: string) => {
         abortEarly: false,
         context: { req },
       });
-      console.log("validationResult: ", validationResult);
+      logger.info(`validationResult:`, validationResult);
     } catch (e: any) {
-      console.log("Error: ", e);
+      logger.error(`validationResult exception:`, e);
       let err;
       if (e.hasOwnProperty("details")) {
         err = e.details.map((err: any) => err.message);

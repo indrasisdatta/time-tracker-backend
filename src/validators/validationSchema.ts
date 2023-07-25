@@ -1,11 +1,12 @@
 import Joi from "joi";
 import { Category } from "../models/Category";
+import { logger } from "../utils/logger";
 
 export const categorySchema = Joi.object({
   name: Joi.string()
     .required()
     .external(async (name, helpers) => {
-      // console.log("Context", helpers.prefs.context);
+      logger.info(`Context:`, helpers.prefs.context);
       // const isUnique = await Category.isCategoryNameUnique(value);
       let findCondition: any = { name };
       if (
