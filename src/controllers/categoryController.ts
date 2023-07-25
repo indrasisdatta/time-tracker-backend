@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import Category from "../models/Category";
+import Category, { ISubCategory } from "../models/Category";
 import { API_STATUS } from "../config/constants";
+import mongoose, { Types, mongo } from "mongoose";
 
 export const getCategories = async (
   req: Request,
@@ -13,5 +14,77 @@ export const getCategories = async (
   } catch (error) {
     // next(error);
     res.status(500).json({ status: API_STATUS.ERROR, err: error });
+  }
+};
+
+export const addCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, description, subCategories: subCat } = req.body;
+    const newCat = new Category({
+      name,
+      description,
+      subCategories: subCat.map((subCat: ISubCategory) => ({
+        _id: new mongoose.Types.ObjectId(),
+        name: subCat.name,
+        description: subCat.description,
+      })),
+    });
+    const cat = await newCat.save();
+    if (cat) {
+      return res.status(200).json({ status: API_STATUS.SUCCESS, data: cat });
+    }
+    res.status(500).json({ status: API_STATUS.ERROR, data: [] });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const existingCat = await Category.findById(req.params.catId);
+    if (!existingCat) {
+      return res
+        .status(400)
+        .json({ status: API_STATUS.ERROR, error: ["Invalid category"] });
+    }
+    const { name, description, subCategories: subCat } = req.body;
+
+    existingCat.name = name;
+    existingCat.description = description;
+    if (subCat && subCat.length > 0) {
+      /* Loop through newly added sub categories */
+      const tempSubCat = subCat.map((newSubCat: ISubCategory) => {
+        let existingSubCat = existingCat.subCategories?.find(
+          (oldSubCat) => oldSubCat.id.toString() === newSubCat._id
+        );
+        /* If id is passed and subcategory already exists, then edit it */
+        if (existingSubCat) {
+          // existingSubCat._id = new Types.ObjectId(existingSubCat._id);
+          existingSubCat.name = newSubCat.name;
+          existingSubCat.description = newSubCat.description;
+          return existingSubCat;
+        }
+        newSubCat._id = new mongoose.Types.ObjectId();
+        /* Add subcategory */
+        return newSubCat;
+      });
+      existingCat.subCategories = tempSubCat;
+    }
+
+    const cat = await existingCat.save();
+    if (cat) {
+      return res.status(200).json({ status: API_STATUS.SUCCESS, data: cat });
+    }
+    res.status(500).json({ status: API_STATUS.ERROR, data: [] });
+  } catch (e) {
+    next(e);
   }
 };
