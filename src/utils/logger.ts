@@ -17,11 +17,12 @@ export const logger: Logger = createLogger({
       level: "info",
       format: format.combine(
         format.colorize({ all: true }),
-        format.printf(
-          ({ level, message }: { level: string; message: string }) => {
-            return `${level.toUpperCase()} ${message}`;
-          }
-        )
+        format.splat()
+        // format.printf(
+        //   ({ level, message }: { level: string; message: string }) => {
+        //     return `${level.toUpperCase()} ${message}`;
+        //   }
+        // )
       ),
     }),
     new File({

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import Category, { ISubCategory } from "../models/Category";
+import { Category, ISubCategory } from "../models/Category";
 import { API_STATUS } from "../config/constants";
 import mongoose, { Types, mongo } from "mongoose";
+import { logger } from "../utils/logger";
 
 export const getCategories = async (
   req: Request,
@@ -13,7 +14,8 @@ export const getCategories = async (
     res.status(200).json({ status: API_STATUS.SUCCESS, data: categories });
   } catch (error) {
     // next(error);
-    res.status(500).json({ status: API_STATUS.ERROR, err: error });
+    logger.info(`Category listing error: ${JSON.stringify(error)}`);
+    res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
 
@@ -38,8 +40,10 @@ export const addCategory = async (
       return res.status(200).json({ status: API_STATUS.SUCCESS, data: cat });
     }
     res.status(500).json({ status: API_STATUS.ERROR, data: [] });
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    // next(error);
+    logger.info(`Category add error: ${JSON.stringify(error)}`);
+    res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
 
@@ -63,7 +67,9 @@ export const updateCategory = async (
       /* Loop through newly added sub categories */
       const tempSubCat = subCat.map((newSubCat: ISubCategory) => {
         let existingSubCat = existingCat.subCategories?.find(
-          (oldSubCat) => oldSubCat.id.toString() === newSubCat._id
+          (oldSubCat) =>
+            oldSubCat.id?.toString() === newSubCat._id ||
+            oldSubCat._id?.toString() === newSubCat._id
         );
         /* If id is passed and subcategory already exists, then edit it */
         if (existingSubCat) {
@@ -84,7 +90,10 @@ export const updateCategory = async (
       return res.status(200).json({ status: API_STATUS.SUCCESS, data: cat });
     }
     res.status(500).json({ status: API_STATUS.ERROR, data: [] });
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    // next(e);
+    console.log(`Category Update Error:`, error);
+    logger.info(`Category Update Error:`, error);
+    res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };

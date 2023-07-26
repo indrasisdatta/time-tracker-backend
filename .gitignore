@@ -1,6 +1,7 @@
 node_modules
-.vscode
 dist
+logs
+coverage
 .env
 .env.local
-logs
+.vscode
