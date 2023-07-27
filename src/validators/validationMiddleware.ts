@@ -25,6 +25,7 @@ export const validationMiddleware = (op: string) => {
         context: { req },
       });
       logger.info(`validationResult:`, validationResult);
+      next();
     } catch (e: any) {
       logger.error(`validationResult exception:`, e);
       let err;
@@ -38,6 +39,5 @@ export const validationMiddleware = (op: string) => {
         error: err,
       });
     }
-    next();
   };
 };
