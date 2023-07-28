@@ -44,4 +44,4 @@ export const Category: Model<ICategory> = model<ICategory>(
   categorySchema
 );
 
-export default Category;
+// export default Category;

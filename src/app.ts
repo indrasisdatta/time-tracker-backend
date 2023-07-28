@@ -5,6 +5,7 @@ import mongoose, { ConnectOptions, mongo } from "mongoose";
 import bodyParser from "body-parser";
 import swaggerUI from "swagger-ui-express";
 import * as swaggerDocument from "./swagger.json";
+import { logger } from "./utils/logger";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -21,21 +22,20 @@ mongoose.connect(process.env.DB_CON_STR!, {
 } as ConnectOptions);
 
 mongoose.connection.on("connected", () => {
-  console.error("MongoDB connection successful");
+  logger.info("MongoDB connection successful");
 });
 
 mongoose.connection.on("error", (err) => {
-  console.error("MongoDB connection error:", err);
+  logger.error("MongoDB connection error:", err);
   process.exit(1);
 });
 
 mongoose.connection.on("disconnected", (res) => {
-  console.error("MongoDB disconnected:", res);
+  logger.warn("MongoDB disconnected:", res);
 });
 /* DB connection code ends */
 
-/* Swagger code starts */
+/* Swagger API */
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
-/* Swagger code ends */
 
 export default app;
