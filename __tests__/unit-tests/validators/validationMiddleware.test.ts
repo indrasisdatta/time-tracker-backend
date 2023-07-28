@@ -1,6 +1,6 @@
 import { NextFunction, Request } from "express";
-import { validationMiddleware } from "../../src/validators/validationMiddleware";
-import { categorySchema } from "../../src/validators/validationSchema";
+import { categorySchema } from "../../../src/validators/validationSchema";
+import { validationMiddleware } from "../../../src/validators/validationMiddleware";
 
 describe("Validation middleware", () => {
   afterEach(() => {
