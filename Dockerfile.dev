@@ -1,0 +1,10 @@
+FROM node:18-alpine AS builder 
+WORKDIR /usr/app  
+COPY package*.json ./
+RUN npm install 
+
+# Copy from local machine's project root to WORKDIR of container 
+COPY . .
+
+RUN npm run test:unit
+RUN npm run test:int
