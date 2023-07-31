@@ -32,16 +32,16 @@ describe("Category Integration testing", () => {
   });
 
   /* Clean up in afterAll hook */
-  // afterAll(async () => {
-  //   try {
-  //     const delRes = await Category.deleteMany({
-  //       _id: { $in: createdRecords },
-  //     });
-  //     console.log("Delete response: ", delRes);
-  //   } catch (e: any) {
-  //     logger.error(`Error deleting category: ${e.getMessage()}`);
-  //   }
-  // });
+  afterAll(async () => {
+    try {
+      const delRes = await Category.deleteMany({
+        _id: { $in: createdRecords },
+      });
+      console.log("Delete response: ", delRes);
+    } catch (e: any) {
+      logger.error(`Error deleting category: ${e.getMessage()}`);
+    }
+  });
 
   describe("GET /category", () => {
     it("Should return all categories", async () => {
