@@ -1,12 +1,12 @@
 import { NextFunction, Request } from "express";
-import { Category } from "../../src/models/Category";
 import {
   addCategory,
   getCategories,
   updateCategory,
-} from "../../src/controllers/categoryController";
-import { logger } from "../../src/utils/logger";
-import { API_STATUS } from "../../src/config/constants";
+} from "../../../src/controllers/categoryController";
+import { API_STATUS } from "../../../src/config/constants";
+import { Category } from "../../../src/models/Category";
+import { logger } from "../../../src/utils/logger";
 
 describe(" >>>> Category APIs", () => {
   afterEach(() => {
