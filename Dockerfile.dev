@@ -8,3 +8,5 @@ COPY . .
 
 RUN npm run test:unit
 RUN npm run test:int
+
+CMD ["npm", "run", "dev"]
