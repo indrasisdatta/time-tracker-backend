@@ -7,10 +7,9 @@
 - [Docker configuration](https://sachithsiriwardana.medium.com/dockerizing-nodejs-application-with-multi-stage-build-e30477ca572)
 
 ### Steps to run:
-1. Rename env files: 
-    .env.test.local to .env.local. Change config 
-    .env.test.production to .env.production
-   Then update env vars as necessary (eg. DB_CON_STR)   
+1. Create env files and set env vars as necessary (eg. DB_CON_STR)  
+    - Copy .env.test.local to .env.local. 
+    - Copy .env.test.production to .env.production  
 2. Run `npm install` command
 3. To run project locally using nodemon: `npm run dev`
 4. To run all unit and integration tests in watch mode: `npm run test:watch`
