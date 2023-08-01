@@ -1,0 +1,16 @@
+version: "3"
+services:
+  node-time-tracker:
+    environment:
+      - NODE_ENV=${ENVIRONMENT}
+    build:
+      context: .
+      dockerfile: ${DOCKER_FILENAME}
+    volumes:
+      - ./:/usr/app
+    container_name: node-time-tracker
+    expose:
+      - "${PORT}"
+    ports:
+      - "${PORT}:${PORT}"
+    #command: npm run dev
