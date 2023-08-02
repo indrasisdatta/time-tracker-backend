@@ -1,0 +1,45 @@
+TIMESHEET QUERIES
+_____________________________________________________________________
+
+1. Get daily timesheet data
+
+    db.getCollection("timesheets").find({
+        "startTime": {
+            "$gte": new Date("2023-08-02"),
+            "$lt": new Date("2023-08-03")
+        },
+        "endTime": {
+            "$gte": new Date("2023-08-02"),
+            "$lt": new Date("2023-08-03")
+        }
+    })
+
+
+
+{
+    "timesheetDate": "2023-07-31",
+    "timeslots": [
+        {
+            "startTime": "08:30",
+            "endTime": "09:30",
+            "category": "64ba14097672ac70ae97acea",
+            "subCategory": "FT",
+            "comments": null
+        },
+        {
+            "startTime": "09:20",
+            "endTime": "09:40",
+            "category": "64ba14097672ac70ae97acea",
+            "subCategory": "Donkey Studio",
+            "comments": null
+        },
+        {
+            "startTime": "09:40",
+            "endTime": "10:30",
+            "category": "64ba164ffb63941f046ce71d",
+            "subCategory": "Breakfast",
+            "comments": null
+        }
+    ]
+}
+

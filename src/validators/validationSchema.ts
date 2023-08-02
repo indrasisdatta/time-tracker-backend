@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { Category } from "../models/Category";
 import { logger } from "../utils/logger";
+import { validateTimeSlots } from "../utils/helpers";
 
 export const categorySchema = Joi.object({
   name: Joi.string()
@@ -47,4 +48,42 @@ export const categorySchema = Joi.object({
   //   "any.required": "Sub-category is required", // name is not passed at all
   //   "string.empty": "Sub-category is required", // name is passed as blank
   // }),
+});
+
+export const timesheetSchema = Joi.object({
+  timesheetDate: Joi.string().required().messages({
+    "any.required": "Date is required", // not passed at all
+    "string.empty": "Date is required", // passed as blank
+  }),
+  timeslots: Joi.array()
+    .min(1)
+    .items(
+      Joi.object({
+        startTime: Joi.string().required().messages({
+          "any.required": "Start time is required",
+          "string.empty": "Start time is required",
+        }),
+        endTime: Joi.string().required().messages({
+          "any.required": "End time is required",
+          "string.empty": "End time is required",
+        }),
+        category: Joi.string().required().messages({
+          "any.required": "Category is required",
+          "string.empty": "Category is required",
+        }),
+        subCategory: Joi.string().required().messages({
+          "any.required": "Sub-category is required",
+          "string.empty": "Sub-category is required",
+        }),
+        comments: Joi.string().allow(null, "").optional(),
+      })
+    )
+    .required()
+    .custom((value, helper) => {
+      const timeslotErr: any = validateTimeSlots(value);
+      if (timeslotErr) {
+        return helper.message(timeslotErr);
+      }
+      return value;
+    }),
 });

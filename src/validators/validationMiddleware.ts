@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { categorySchema } from "./validationSchema";
+import { categorySchema, timesheetSchema } from "./validationSchema";
 import { API_STATUS } from "../config/constants";
 import { logger } from "../utils/logger";
 
@@ -10,7 +10,8 @@ export const validationMiddleware = (op: string) => {
       case "category":
         schema = categorySchema;
         break;
-      case "editCategory":
+      case "timesheet":
+        schema = timesheetSchema;
         break;
     }
     if (!schema) {
@@ -30,7 +31,14 @@ export const validationMiddleware = (op: string) => {
       logger.error(`validationResult exception:`, e);
       let err;
       if (e.hasOwnProperty("details")) {
-        err = e.details.map((err: any) => err.message);
+        err = e.details.map((err: any) => {
+          /* Normal fields */
+          if (!err.path || err.path?.length == 1) {
+            return err.message;
+          }
+          /* Nested fields - show row no */
+          return `Row #${err.path[1] + 1}: ${err.message}`;
+        });
       } else if ((e as Error).hasOwnProperty("message")) {
         err = [e.message];
       }
