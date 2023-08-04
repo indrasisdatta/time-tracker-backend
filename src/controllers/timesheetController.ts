@@ -1,8 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
-import { Timesheet } from "../models/Timesheet";
+import { ITimesheet, Timesheet } from "../models/Timesheet";
 import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
+import { convertDatetoLocalTZ } from "../utils/helpers";
+
+/**
+ * TODO 1: Timezone
+ * TODO 2: Retrieve daily timesheet entries (datewise)
+ * TODO 3: Timesheet summary (hrs spent on each category, subcategory)
+ */
 
 export const saveTimesheet = async (
   req: Request,
@@ -14,29 +21,61 @@ export const saveTimesheet = async (
   try {
     const { timesheetDate, timeslots } = req.body;
 
-    // if (cat) {
-    return res
-      .status(200)
-      .json({ status: API_STATUS.SUCCESS, data: timeslots });
-    // }
+    // return res
+    //   .status(200)
+    //   .json({ status: API_STATUS.SUCCESS, data: timeslots });
+
     // res.status(500).json({ status: API_STATUS.ERROR, data: [] });
 
-    // timeslots.map(slot => {
+    if (!timeslots || timeslots.length == 0) {
+      return res
+        .status(400)
+        .json({ status: API_STATUS.ERROR, error: ["No timesheet entered"] });
+    }
 
-    // })
-    const timeslot = new Timesheet({
-      startTime: new Date("2023-08-03 09:30"),
-      endTime: new Date("2023-08-03 10:00"),
-      category: "64b8af518d5261063b805d4c",
-      subCategory: "Official",
-      comments: "Postman insert",
+    /* 1. Delete previous entries for timesheetDate */
+    const dateObj = new Date(timesheetDate);
+    const nextDateObj = new Date(timesheetDate);
+    nextDateObj.setDate(nextDateObj.getDate() + 1);
+    logger.info(`Timesheet date: ${timesheetDate}`);
+    logger.info(`dateObj:`, dateObj);
+    logger.info(`nextDateObj: `, nextDateObj);
+
+    const delTimesheet = Timesheet.deleteMany({
+      startTime: {
+        $gte: dateObj,
+        $lt: nextDateObj,
+      },
+      endTime: {
+        $gte: dateObj,
+        $lt: nextDateObj,
+      },
     });
-    const timesheet = await timeslot.save();
+    logger.info(`Delete existing recs for ${timesheetDate} date`, delTimesheet);
+
+    /* 2. Insert data */
+    const timesheetArr = timeslots.map((slot: ITimesheet) => {
+      slot.startTime = new Date(`${timesheetDate} ${slot.startTime}`);
+      slot.endTime = new Date(`${timesheetDate} ${slot.endTime}`);
+      // slot.startTime = convertDatetoLocalTZ(
+      //   new Date(`${timesheetDate} ${slot.startTime}`).getTime()
+      // );
+      // slot.endTime = convertDatetoLocalTZ(
+      //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
+      // );
+      return slot;
+    });
+    // const timeslot = new Timesheet(timesheetArr);
+    const timesheet = await Timesheet.insertMany(timeslots);
     logger.info("Timesheet saved", timesheet);
     await session.commitTransaction();
+    return res
+      .status(200)
+      .json({ status: API_STATUS.SUCCESS, data: timesheet });
   } catch (error) {
     await session.abortTransaction();
     logger.info("Error: ", error);
+    return res.status(500).json({ status: API_STATUS.SUCCESS, error: error });
   } finally {
     session.endSession();
   }
@@ -49,13 +88,21 @@ export const getDailyRecords = async (
 ) => {
   try {
     const { date } = req.params;
-    const records = await Timesheet.find({}).populate(
-      "category",
-      "name description"
-    );
+    const records = await Timesheet.find({})
+      .select("category subCategory comments startTimeLocal endTimeLocal")
+      .populate("category", "name description")
+      .exec();
 
-    console.log("Timesheet records", records);
+    if (records) {
+      return res
+        .status(200)
+        .json({ status: API_STATUS.SUCCESS, data: records });
+    }
+    return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
   } catch (error) {
     logger.info("Daily records error: ", error);
+    return res
+      .status(500)
+      .json({ status: API_STATUS.SUCCESS, data: [], error });
   }
 };
