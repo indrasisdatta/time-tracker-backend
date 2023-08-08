@@ -35,11 +35,6 @@ const timesheetSchema = new Schema(
   },
   {
     virtuals: {
-      // timesheetDateLocal: {
-      //   get() {
-      //     return moment(this.timesheetDate).tz(process.env.TIME_ZONE!).format();
-      //   },
-      // },
       startTimeLocal: {
         get() {
           return moment(this.startTime).tz(process.env.TIME_ZONE!).format();

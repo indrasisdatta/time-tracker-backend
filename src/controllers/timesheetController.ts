@@ -3,9 +3,9 @@ import { logger } from "../utils/logger";
 import { ITimesheet, Timesheet } from "../models/Timesheet";
 import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
-import { convertDatetoLocalTZ } from "../utils/helpers";
-// import moment from "moment-timezone";
-import * as moment from "moment-timezone";
+import moment from "moment-timezone";
+// import { convertDatetoLocalTZ } from "../utils/helpers";
+// import * as moment from "moment-timezone";
 
 export const saveTimesheet = async (
   req: Request,
@@ -24,21 +24,10 @@ export const saveTimesheet = async (
     }
 
     /* 1. Delete previous entries for timesheetDate */
-    const dateObj = new Date(timesheetDate);
-    const nextDateObj = new Date(timesheetDate);
-    nextDateObj.setDate(nextDateObj.getDate() + 1);
-    logger.info(`Timesheet date: ${timesheetDate}`);
-    logger.info(`dateObj:`, dateObj);
-    logger.info(`nextDateObj: `, nextDateObj);
-
-    const delTimesheet = Timesheet.deleteMany({
-      startTime: {
-        $gte: dateObj,
-        $lt: nextDateObj,
-      },
-      endTime: {
-        $gte: dateObj,
-        $lt: nextDateObj,
+    const delTimesheet = await Timesheet.deleteMany({
+      timesheetDate: {
+        $gte: moment.utc(timesheetDate).toDate(),
+        $lt: moment.utc(timesheetDate).add(1, "days").toDate(),
       },
     });
     logger.info(`Delete existing recs for ${timesheetDate} date`, delTimesheet);
@@ -56,7 +45,6 @@ export const saveTimesheet = async (
       // );
       return slot;
     });
-    // const timeslot = new Timesheet(timesheetArr);
     const timesheet = await Timesheet.insertMany(timeslots);
     logger.info("Timesheet saved", timesheet);
     await session.commitTransaction();
@@ -79,8 +67,20 @@ export const getDailyRecords = async (
 ) => {
   try {
     const { date } = req.params;
-    const records = await Timesheet.find({})
-      .select("category subCategory comments startTimeLocal endTimeLocal")
+    if (!date) {
+      return res
+        .status(400)
+        .json({ status: API_STATUS.ERROR, data: [], error: "Date is missing" });
+    }
+    const records = await Timesheet.find({
+      timesheetDate: {
+        $gte: new Date(date),
+        $lt: moment.utc(date).add(1, "days").toDate(),
+      },
+    })
+      .select(
+        "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal"
+      )
       .populate("category", "name description")
       .exec();
 
