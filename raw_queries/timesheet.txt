@@ -14,6 +14,57 @@ _____________________________________________________________________
         }
     })
 
+----
+
+Aggregate version
+
+db.timesheets.aggregate([
+    {
+        $match: {
+            "startTime": {
+                "$gte": new Date("2023-08-03"),
+                "$lt": new Date("2023-08-04")
+            },
+            "endTime": {
+                "$gte": new Date("2023-08-03"),
+                "$lt": new Date("2023-08-04")
+            }
+        }
+    },
+    {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+    },
+    /*{
+        $addFields: {
+            timeDiff: {
+                $dateDiff: { startDate: "$startTime", endDate: "$endTime", unit: 'minute'}
+            }
+        }
+    },*/
+    {
+        $group: {
+            _id: "$subCategory",            
+            subCategory: { $first: "$subCategory"},
+            categoryData: { $first: "$categoryData.name" },
+            /* totalTime: { $sum: "$timeDiff"} */
+             totalTime: { 
+                 $sum: {
+                     $dateDiff: { startDate: "$startTime", endDate: "$endTime", unit: 'minute'} 
+                 }
+             } 
+        }
+    }, 
+    { $unwind: "$categoryData" },
+    {
+        $sort: {totalTime: -1}
+    }
+])
+
 
 
 {

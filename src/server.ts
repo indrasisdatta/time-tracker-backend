@@ -27,6 +27,11 @@ mongoose.connection.on("error", (err) => {
 mongoose.connection.on("disconnected", (res) => {
   logger.warn("MongoDB disconnected:", res);
 });
+
+// Enable query logging
+mongoose.set("debug", (collectionName, method, query, doc) => {
+  console.log(`${collectionName}.${method}`, JSON.stringify(query), doc);
+});
 /* DB connection code ends */
 
 app.use("/", routes);

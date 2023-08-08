@@ -44,10 +44,6 @@ export const categorySchema = Joi.object({
       })
     )
     .required(),
-  // .messages({
-  //   "any.required": "Sub-category is required", // name is not passed at all
-  //   "string.empty": "Sub-category is required", // name is passed as blank
-  // }),
 });
 
 export const timesheetSchema = Joi.object({
@@ -86,4 +82,16 @@ export const timesheetSchema = Joi.object({
       }
       return value;
     }),
+});
+
+export const timesheetSummarySchema = Joi.object({
+  startDate: Joi.date().required().messages({
+    "any.required": "Start date is required",
+    "string.empty": "Start date is required",
+  }),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).required().messages({
+    "any.required": "End date is required",
+    "string.empty": "End date is required",
+    "date.min": "End date cannot be less than start date",
+  }),
 });

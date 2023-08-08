@@ -4,12 +4,8 @@ import { ITimesheet, Timesheet } from "../models/Timesheet";
 import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
 import { convertDatetoLocalTZ } from "../utils/helpers";
-
-/**
- * TODO 1: Timezone
- * TODO 2: Retrieve daily timesheet entries (datewise)
- * TODO 3: Timesheet summary (hrs spent on each category, subcategory)
- */
+// import moment from "moment-timezone";
+import * as moment from "moment-timezone";
 
 export const saveTimesheet = async (
   req: Request,
@@ -20,12 +16,6 @@ export const saveTimesheet = async (
   session.startTransaction();
   try {
     const { timesheetDate, timeslots } = req.body;
-
-    // return res
-    //   .status(200)
-    //   .json({ status: API_STATUS.SUCCESS, data: timeslots });
-
-    // res.status(500).json({ status: API_STATUS.ERROR, data: [] });
 
     if (!timeslots || timeslots.length == 0) {
       return res
@@ -55,6 +45,7 @@ export const saveTimesheet = async (
 
     /* 2. Insert data */
     const timesheetArr = timeslots.map((slot: ITimesheet) => {
+      slot.timesheetDate = new Date(timesheetDate);
       slot.startTime = new Date(`${timesheetDate} ${slot.startTime}`);
       slot.endTime = new Date(`${timesheetDate} ${slot.endTime}`);
       // slot.startTime = convertDatetoLocalTZ(
@@ -101,8 +92,71 @@ export const getDailyRecords = async (
     return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
   } catch (error) {
     logger.info("Daily records error: ", error);
-    return res
-      .status(500)
-      .json({ status: API_STATUS.SUCCESS, data: [], error });
+    return res.status(500).json({ status: API_STATUS.ERROR, data: [], error });
+  }
+};
+
+export const getTimesheetSummary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { startDate, endDate } = req.body;
+
+    const timesheetSummary = await Timesheet.aggregate([
+      {
+        $match: {
+          timesheetDate: {
+            $gte: new Date(startDate),
+            //$lt: moment(startDate).add(30, "hours"),
+            // $lt: moment.utc(endDate).add(1, "days").toDate(),
+            $lte: new Date(endDate),
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+      },
+      {
+        $group: {
+          _id: "$subCategory",
+          categoryData: { $first: "$categoryData.name" },
+          subCategory: { $first: "$subCategory" },
+          totalTime: {
+            $sum: {
+              $dateDiff: {
+                startDate: "$startTime",
+                endDate: "$endTime",
+                unit: "minute",
+              },
+            },
+          },
+        },
+      },
+      { $unwind: "$categoryData" },
+      {
+        $sort: { totalTime: -1 },
+      },
+    ]);
+
+    if (timesheetSummary) {
+      return res
+        .status(200)
+        .json({ status: API_STATUS.SUCCESS, data: timesheetSummary });
+    }
+    return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
+  } catch (error) {
+    logger.info("Summary error: ", error);
+    return res.status(500).json({
+      status: API_STATUS.ERROR,
+      data: [],
+      error,
+    });
   }
 };

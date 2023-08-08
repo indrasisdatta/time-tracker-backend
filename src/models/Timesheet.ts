@@ -5,6 +5,7 @@ import moment from "moment-timezone";
 // import * as timezonePlugin from "mongoose-timezone";
 
 export interface ITimesheet extends Document {
+  timesheetDate: Date;
   startTime: Date;
   endTime: Date;
   category: ICategory;
@@ -14,6 +15,10 @@ export interface ITimesheet extends Document {
 
 const timesheetSchema = new Schema(
   {
+    timesheetDate: {
+      type: Date,
+      required: true,
+    },
     startTime: {
       type: Date,
       required: true,
@@ -30,6 +35,11 @@ const timesheetSchema = new Schema(
   },
   {
     virtuals: {
+      // timesheetDateLocal: {
+      //   get() {
+      //     return moment(this.timesheetDate).tz(process.env.TIME_ZONE!).format();
+      //   },
+      // },
       startTimeLocal: {
         get() {
           return moment(this.startTime).tz(process.env.TIME_ZONE!).format();

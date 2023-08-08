@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { categorySchema, timesheetSchema } from "./validationSchema";
+import {
+  categorySchema,
+  timesheetSchema,
+  timesheetSummarySchema,
+} from "./validationSchema";
 import { API_STATUS } from "../config/constants";
 import { logger } from "../utils/logger";
 
@@ -12,6 +16,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "timesheet":
         schema = timesheetSchema;
+        break;
+      case "timesheet_summary":
+        schema = timesheetSummarySchema;
         break;
     }
     if (!schema) {
