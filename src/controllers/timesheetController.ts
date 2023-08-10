@@ -12,6 +12,8 @@ export const saveTimesheet = async (
   res: Response,
   next: NextFunction
 ) => {
+  let apiStatus: number = 500;
+  let apiResponse;
   const session: ClientSession = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -48,15 +50,16 @@ export const saveTimesheet = async (
     const timesheet = await Timesheet.insertMany(timeslots);
     logger.info("Timesheet saved", timesheet);
     await session.commitTransaction();
-    return res
-      .status(200)
-      .json({ status: API_STATUS.SUCCESS, data: timesheet });
+    apiStatus = 200;
+    apiResponse = { status: API_STATUS.SUCCESS, data: timesheet };
   } catch (error) {
     await session.abortTransaction();
     logger.info("Error: ", error);
-    return res.status(500).json({ status: API_STATUS.SUCCESS, error: error });
+    apiStatus = 500;
+    apiResponse = { status: API_STATUS.ERROR, error };
   } finally {
     session.endSession();
+    return res.status(apiStatus).json(apiResponse);
   }
 };
 
