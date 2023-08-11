@@ -1,6 +1,6 @@
 import { Timesheet } from "../../src/models/Timesheet";
 import { logger } from "../../src/utils/logger";
-import server from "../../src/server";
+import server, { conn } from "../../src/server";
 import request from "supertest";
 
 describe("Timesheet Integration test", () => {
@@ -19,8 +19,10 @@ describe("Timesheet Integration test", () => {
       if (createdRecords.length > 0) {
         await Timesheet.deleteMany({ _id: { $in: createdRecords } });
       }
+      // Server connection closed.
+      await conn.close();
     } catch (e) {
-      console.error("Cleanup Delete error", e);
+      console.error("Cleanup error", e);
     }
   });
 

@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "test:watch": "cross-env NODE_ENV=local jest --watch",
     "test:unit": "cross-env NODE_ENV=local jest -c jest.unit.config.js",
-    "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js",
+    "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js --maxWorkers=1 --forceExit",
     "build": "cross-env NODE_ENV=local npx tsc",
     "build:prod": "cross-env NODE_ENV=production npx tsc",
     "start": "node dist/src/server.js",
