@@ -86,12 +86,14 @@ export const timesheetSchema = Joi.object({
 
 export const timesheetSummarySchema = Joi.object({
   startDate: Joi.date().required().messages({
-    "any.required": "Start date is required",
-    "string.empty": "Start date is required",
+    "any.required": "Enter Start date in YYYY-MM-DD format",
+    "date.empty": "Enter Start date in YYYY-MM-DD format",
+    "date.base": "Enter Start date in YYYY-MM-DD format",
   }),
   endDate: Joi.date().iso().min(Joi.ref("startDate")).required().messages({
-    "any.required": "End date is required",
-    "string.empty": "End date is required",
+    "any.required": "Enter End date in YYYY-MM-DD format",
+    "date.empty": "Enter End date in YYYY-MM-DD format",
     "date.min": "End date cannot be less than start date",
+    "date.format": "Enter End date in YYYY-MM-DD format",
   }),
 });
