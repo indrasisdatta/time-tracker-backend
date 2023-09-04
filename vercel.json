@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "devCommand": "npm run dev",
   "builds": [
     {
       "src": "dist/src/server.js",
@@ -11,6 +12,12 @@
     {
       "src": "/(.*)",
       "dest": "dist/src/server.js"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "dist/src/server.js"
     }
   ]
 }
