@@ -97,3 +97,16 @@ export const updateCategory = async (
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
+
+export const deleteCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const category = await Category.findOneAndDelete({ _id: req.params.catId });
+    return res.status(200).json({ status: API_STATUS.SUCCESS, data: category });
+  } catch (error) {
+    return res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
