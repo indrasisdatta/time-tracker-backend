@@ -29,3 +29,4 @@ Dockerfile uses **multi-stage** build:
 - **Stage 2**: Install only the required dependencies (not dev dependencies) and copy build code generated in previous stage. 
 Finally start the application using npm start command.
    
+### Swagger doc: http://localhost:5000/api-docs/

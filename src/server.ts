@@ -34,6 +34,10 @@ mongoose.set("debug", (collectionName, method, query, doc) => {
 });
 /* DB connection code ends */
 
+app.get("/", (req: Request, res: Response) => {
+  return res.send("App is running");
+});
+
 app.use("/", routes);
 
 // Custom error handling middleware for 500 errors

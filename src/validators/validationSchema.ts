@@ -36,11 +36,36 @@ export const categorySchema = Joi.object({
     .items(
       Joi.object({
         _id: Joi.string().optional(),
-        name: Joi.string().required().messages({
-          "any.required": "Sub-category name is required",
-          "string.empty": "Sub-category name is required",
-        }),
-        description: Joi.string().optional(),
+        name: Joi.string()
+          .required()
+          .external(async (name, helpers) => {
+            logger.info(`Context:`, helpers.prefs.context);
+            /* {"subCategories.name": "FT"},
+            {"subCategories": {"$elemMatch": {name: "FT""} }} */
+            let findCondition: any = {
+              "subCategories.name": name,
+            };
+            if (
+              typeof helpers.prefs.context !== "undefined" &&
+              helpers.prefs.context.req?.params?.catId
+            ) {
+              findCondition = {
+                ...findCondition,
+                _id: { $ne: helpers.prefs.context.req?.params?.catId },
+              };
+            }
+            const isExisting = await Category.findOne(findCondition);
+            if (isExisting) {
+              throw new Error("Sub-category name already exists");
+              // return helpers.error("Category name already exists");
+            }
+            return name;
+          })
+          .messages({
+            "any.required": "Sub-category name is required",
+            "string.empty": "Sub-category name is required",
+          }),
+        description: Joi.string().optional().allow(null, ""),
       })
     )
     .required(),

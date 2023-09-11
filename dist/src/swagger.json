@@ -1,0 +1,283 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Swagger API Documentation",
+        "version": "1.0.0"
+    },
+    "schemes": ["http"],
+    "servers": [{ "url": "http://localhost:4000/" }],
+    "paths": {
+        "/category": {
+            "get": {
+                "tags": ["Category"],
+                "summary": "Fetch categories",
+                "description": "Get list of all categories",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 1,
+                                    "data": [
+                                        {
+                                            "_id": "64b8af518d5261063b805d4c",
+                                            "name": "Cognizant",
+                                            "description": "CTS Official",
+                                            "subCategories": [
+                                                {
+                                                    "_id": "64b8af518d5261063b805d4b",
+                                                    "name": "Official Task"
+                                                },
+                                                {
+                                                    "_id": "64b8b0e48d5261063b805d4f",
+                                                    "name": "VZ"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "_id": "64ba14097672ac70ae97acea",
+                                            "name": "Freelance",
+                                            "description": "Freelance projects",
+                                            "subCategories": [
+                                                {
+                                                    "_id": "64ba307608aa5880409f1940",
+                                                    "name": "FT"
+                                                },
+                                                {
+                                                    "name": "Donkey Studio"
+                                                }
+                                            ],
+                                            "createdAt": "2023-07-21T05:13:45.926Z",
+                                            "updatedAt": "2023-07-21T07:15:02.684Z",
+                                            "__v": 4
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Not Found"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Category"],
+                "summary": "Add category",
+                "description": "Add new category",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddCategorySchemaHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddCategorySchemaBody"
+                                },
+                                "example": {
+                                    "name": "Test cat",
+                                    "description": "Test cat desc",
+                                    "subCategories": [
+                                        { "name": "Test subcat1", "description": "Desc" },
+                                        { "name": "Test subcat2", "description": "Desc" }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "error": ["Category name already exists (name)"]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Not Found"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/category/{catId}": {
+            "put": {
+                "tags": ["Category"],
+                "summary": "Edit category",
+                "description": "Edit category and sub-categories",
+                "parameters": [
+                    {
+                        "name": "catId",
+                        "in": "path",
+                        "description": "ID of the category to be edited",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EditCategorySchemaHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddCategorySchemaBody"
+                                },
+                                "example": {
+                                    "_id": "64b8af518d5261063b805d4b",
+                                    "name": "Test cat",
+                                    "description": "Test cat desc",
+                                    "subCategories": [
+                                        {
+                                            "_id": "64b8af518d5261063b805d47",
+                                            "name": "Test subcat1",
+                                            "description": "Desc"
+                                        },
+                                        {
+                                            "_id": "64b8af518d5261063b805d49",
+                                            "name": "Test subcat2",
+                                            "description": "Desc"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "error": ["Category name already exists (name)"]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Not Found"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "status": 0,
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AddCategorySchemaBody": {
+                "type": "object",
+                "properties": {
+                    "status": { "type": "integer" },
+                    "data": { "type": "object" }
+                }
+            },
+            "AddCategorySchemaHeader": {
+                "required": ["name", "description", "subCategories"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "example": "Test cat"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Test cat desc"
+                    },
+                    "subCategories": {
+                        "type": "array",
+                        "example": "[{ \"name\": \"Test subcat1\", \"description\": \"Desc\" }, { \"name\": \"Test subcat2\", \"description\": \"Desc\" }]"
+                    }
+                }
+            },
+            "EditCategorySchemaHeader": {
+                "required": ["name", "description", "subCategories"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "example": "Test cat"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Test cat desc"
+                    },
+                    "subCategories": {
+                        "type": "array",
+                        "example": "[{ \"_id\": \"64b8af518d5261063b805d4b\", \"name\": \"Test subcat1\", \"description\": \"Desc\" }, { \"name\": \"Test subcat2\", \"description\": \"Desc\" }]"
+                    }
+                }
+            }
+        }
+    }
+}

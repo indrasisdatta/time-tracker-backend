@@ -10,6 +10,7 @@
     "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js --maxWorkers=1 --forceExit",
     "build": "cross-env NODE_ENV=local npx tsc",
     "build:prod": "cross-env NODE_ENV=production npx tsc",
+    "start-ts": "nodemon src/server.ts",
     "start": "node dist/src/server.js",
     "dev": "cross-env NODE_ENV=local concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js\" "
   },

@@ -19,6 +19,26 @@ export const getCategories = async (
   }
 };
 
+export const getCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const existingCat = await Category.findById(req.params.catId);
+    if (!existingCat) {
+      return res
+        .status(400)
+        .json({ status: API_STATUS.ERROR, error: ["Invalid category"] });
+    }
+    res.status(200).json({ status: API_STATUS.SUCCESS, data: existingCat });
+  } catch (error) {
+    // next(error);
+    logger.info(`Category listing error: ${JSON.stringify(error)}`);
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
 export const addCategory = async (
   req: Request,
   res: Response,
@@ -95,5 +115,18 @@ export const updateCategory = async (
     console.log(`Category Update Error:`, error);
     logger.info(`Category Update Error:`, error);
     res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
+export const deleteCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const category = await Category.findOneAndDelete({ _id: req.params.catId });
+    return res.status(200).json({ status: API_STATUS.SUCCESS, data: category });
+  } catch (error) {
+    return res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
