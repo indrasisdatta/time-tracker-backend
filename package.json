@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "test:watch": "cross-env NODE_ENV=local jest --watch",
     "test:unit": "cross-env NODE_ENV=local jest -c jest.unit.config.js",
-    "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js",
+    "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js --maxWorkers=1 --forceExit",
     "build": "cross-env NODE_ENV=local npx tsc",
     "build:prod": "cross-env NODE_ENV=production npx tsc",
     "start-ts": "nodemon src/server.ts",
@@ -26,7 +26,9 @@
     "express": "^4.18.2",
     "express-joi-validation": "^5.0.1",
     "joi": "^17.9.2",
+    "moment-timezone": "^0.5.43",
     "mongoose": "^7.3.4",
+    "mongoose-timezone": "^1.3.0",
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.1",
     "winston": "^3.10.0"

@@ -2,7 +2,7 @@
 import request from "supertest";
 import { logger } from "../../src/utils/logger";
 // import mongoose, { ConnectOptions } from "mongoose";
-import server from "../../src/server";
+import server, { conn } from "../../src/server";
 import { Category, ISubCategory } from "../../src/models/Category";
 
 describe("Category Integration testing", () => {
@@ -38,8 +38,10 @@ describe("Category Integration testing", () => {
         _id: { $in: createdRecords },
       });
       console.log("Delete response: ", delRes);
+      // Server connection closed.
+      await conn.close();
     } catch (e: any) {
-      logger.error(`Error deleting category: ${e.getMessage()}`);
+      logger.error(`Clean up error: ${e.getMessage()}`);
     }
   });
 

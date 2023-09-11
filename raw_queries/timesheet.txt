@@ -1,0 +1,96 @@
+TIMESHEET QUERIES
+_____________________________________________________________________
+
+1. Get daily timesheet data
+
+    db.getCollection("timesheets").find({
+        "startTime": {
+            "$gte": new Date("2023-08-03"),
+            "$lt": new Date("2023-08-04")
+        },
+        "endTime": {
+            "$gte": new Date("2023-08-03"),
+            "$lt": new Date("2023-08-04")
+        }
+    })
+
+----
+
+Aggregate version
+
+db.timesheets.aggregate([
+    {
+        $match: {
+            "startTime": {
+                "$gte": new Date("2023-08-03"),
+                "$lt": new Date("2023-08-04")
+            },
+            "endTime": {
+                "$gte": new Date("2023-08-03"),
+                "$lt": new Date("2023-08-04")
+            }
+        }
+    },
+    {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+    },
+    /*{
+        $addFields: {
+            timeDiff: {
+                $dateDiff: { startDate: "$startTime", endDate: "$endTime", unit: 'minute'}
+            }
+        }
+    },*/
+    {
+        $group: {
+            _id: "$subCategory",            
+            subCategory: { $first: "$subCategory"},
+            categoryData: { $first: "$categoryData.name" },
+            /* totalTime: { $sum: "$timeDiff"} */
+             totalTime: { 
+                 $sum: {
+                     $dateDiff: { startDate: "$startTime", endDate: "$endTime", unit: 'minute'} 
+                 }
+             } 
+        }
+    }, 
+    { $unwind: "$categoryData" },
+    {
+        $sort: {totalTime: -1}
+    }
+])
+
+
+
+{
+    "timesheetDate": "2023-07-31",
+    "timeslots": [
+        {
+            "startTime": "08:30",
+            "endTime": "09:30",
+            "category": "64ba14097672ac70ae97acea",
+            "subCategory": "FT",
+            "comments": null
+        },
+        {
+            "startTime": "09:20",
+            "endTime": "09:40",
+            "category": "64ba14097672ac70ae97acea",
+            "subCategory": "Donkey Studio",
+            "comments": null
+        },
+        {
+            "startTime": "09:40",
+            "endTime": "10:30",
+            "category": "64ba164ffb63941f046ce71d",
+            "subCategory": "Breakfast",
+            "comments": null
+        }
+    ]
+}
+
