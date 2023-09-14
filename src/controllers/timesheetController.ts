@@ -84,7 +84,7 @@ export const getDailyRecords = async (
       .select(
         "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal"
       )
-      .populate("category", "name description")
+      .populate("category", "name description subCategories")
       .exec();
 
     if (records) {
