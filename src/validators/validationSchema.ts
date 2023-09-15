@@ -65,6 +65,7 @@ export const categorySchema = Joi.object({
             "any.required": "Sub-category name is required",
             "string.empty": "Sub-category name is required",
           }),
+        isProductive: Joi.boolean().optional().allow(null, ""),
         description: Joi.string().optional().allow(null, ""),
       })
     )

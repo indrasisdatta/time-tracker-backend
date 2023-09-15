@@ -52,6 +52,7 @@ export const addCategory = async (
       subCategories: subCat.map((subCat: ISubCategory) => ({
         _id: new mongoose.Types.ObjectId(),
         name: subCat.name,
+        isProductive: subCat.isProductive,
         description: subCat.description,
       })),
     });
@@ -95,6 +96,7 @@ export const updateCategory = async (
         if (existingSubCat) {
           // existingSubCat._id = new Types.ObjectId(existingSubCat._id);
           existingSubCat.name = newSubCat.name;
+          existingSubCat.isProductive = newSubCat.isProductive;
           existingSubCat.description = newSubCat.description;
           return existingSubCat;
         }

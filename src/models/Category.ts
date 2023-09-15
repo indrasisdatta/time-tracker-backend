@@ -2,6 +2,7 @@ import { Document, Model, Schema, model } from "mongoose";
 
 export interface ISubCategory extends Document {
   name: string;
+  isProductive?: boolean;
   description?: string;
 }
 
@@ -24,6 +25,7 @@ const categorySchema = new Schema(
       new Schema<ISubCategory>({
         _id: { type: Schema.ObjectId },
         name: { type: String, required: true, unique: true },
+        isProductive: { type: Boolean },
         description: { type: String },
       }),
     ],
