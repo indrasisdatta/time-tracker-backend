@@ -3,6 +3,7 @@ import {
   getDailyRecords,
   getTimesheetSummary,
   saveTimesheet,
+  timesheetCalendar,
 } from "../controllers/timesheetController";
 import { validationMiddleware } from "../validators/validationMiddleware";
 
@@ -13,6 +14,11 @@ router.post(
   "/summary",
   validationMiddleware("timesheet_summary"),
   getTimesheetSummary
+);
+router.post(
+  "/calendar",
+  validationMiddleware("timesheet_summary"),
+  timesheetCalendar
 );
 
 export default router;
