@@ -94,3 +94,16 @@ db.timesheets.aggregate([
     ]
 }
 
+-----
+
+/* Find timesheet for productive */
+db.timesheets.find({
+    subCategory: {$in: ["FT", "Donkey Studio", "VZ", "Node.js", "React", "React JS", "Node JS", "React.js", "Next.js", "Interview", "Verizon", "Official"]}
+})  
+/* Update existing productive data with isProductive flag */
+db.timesheets.updateMany(
+{
+    subCategory: {$in: ["FT", "Donkey Studio", "VZ", "Node.js", "React", "React JS", "Node JS", "React.js", "Next.js", "Interview", "Verizon", "Official"]}
+}, 
+{$set: { isProductive: true } }
+)
