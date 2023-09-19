@@ -11,6 +11,7 @@ export interface ITimesheet extends Document {
   category: ICategory;
   subCategory: string;
   comments: string;
+  isProductive: boolean;
 }
 
 const timesheetSchema = new Schema(
@@ -32,6 +33,7 @@ const timesheetSchema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     subCategory: { type: String, required: true },
     comments: { type: String },
+    isProductive: { type: Boolean },
   },
   {
     virtuals: {

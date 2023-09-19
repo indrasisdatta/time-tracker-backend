@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 // import { convertDatetoLocalTZ } from "../utils/helpers";
 // import * as moment from "moment-timezone";
 
+/* Add/update timesheet entry based on date */
 export const saveTimesheet = async (
   req: Request,
   res: Response,
@@ -63,6 +64,7 @@ export const saveTimesheet = async (
   }
 };
 
+/* Fetch timesheet entries for a specific date */
 export const getDailyRecords = async (
   req: Request,
   res: Response,
@@ -99,6 +101,7 @@ export const getDailyRecords = async (
   }
 };
 
+/* Generate timesheet summary i.e time spent in each category */
 export const getTimesheetSummary = async (
   req: Request,
   res: Response,
@@ -156,6 +159,70 @@ export const getTimesheetSummary = async (
     return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
   } catch (error) {
     logger.info("Summary error: ", error);
+    return res.status(500).json({
+      status: API_STATUS.ERROR,
+      data: [],
+      error,
+    });
+  }
+};
+
+/* Calculate total productive time spend on each day (between a date range) */
+export const timesheetCalendar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { startDate, endDate } = req.body;
+    const calendarData = await Timesheet.aggregate([
+      /* Match stage */
+      {
+        $match: {
+          timesheetDate: {
+            $gte: new Date(startDate),
+            $lt: new Date(endDate),
+          },
+          isProductive: true,
+        },
+      },
+      /* Group stage */
+      {
+        $group: {
+          _id: "$timesheetDate",
+          totalTimeMins: {
+            $sum: {
+              $dateDiff: {
+                startDate: "$startTime",
+                endDate: "$endTime",
+                unit: "minute",
+              },
+            },
+          },
+        },
+      },
+      /* Project stage */
+      {
+        $project: {
+          timesheetDate: "$_id",
+          totalTimeMins: 1,
+          _id: 0,
+        },
+      },
+      /* Sort in asc */
+      {
+        $sort: { timesheetDate: 1 },
+      },
+    ]);
+
+    if (calendarData) {
+      return res
+        .status(200)
+        .json({ status: API_STATUS.SUCCESS, data: calendarData });
+    }
+    return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
+  } catch (error) {
+    logger.error("Calendar error: ", error);
     return res.status(500).json({
       status: API_STATUS.ERROR,
       data: [],

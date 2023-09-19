@@ -3,18 +3,18 @@ _____________________________________________________________________
 
 1. Get daily timesheet data
 
-    db.getCollection("timesheets").find({
-        "startTime": {
-            "$gte": new Date("2023-08-03"),
-            "$lt": new Date("2023-08-04")
-        },
-        "endTime": {
-            "$gte": new Date("2023-08-03"),
-            "$lt": new Date("2023-08-04")
-        }
-    })
+db.getCollection("timesheets").find({
+    "startTime": {
+        "$gte": new Date("2023-08-03"),
+        "$lt": new Date("2023-08-04")
+    },
+    "endTime": {
+        "$gte": new Date("2023-08-03"),
+        "$lt": new Date("2023-08-04")
+    }
+})
 
-----
+------------------------------------------------
 
 Aggregate version
 
@@ -93,4 +93,64 @@ db.timesheets.aggregate([
         }
     ]
 }
+
+-----
+
+/* Find timesheet for productive */
+db.timesheets.find({
+    subCategory: {$in: ["FT", "Donkey Studio", "VZ", "Node.js", "React", "React JS", "Node JS", "React.js", "Next.js", "Interview", "Verizon", "Official"]}
+})  
+/* Update existing productive data with isProductive flag */
+db.timesheets.updateMany(
+{
+    subCategory: {$in: ["FT", "Donkey Studio", "VZ", "Node.js", "React", "React JS", "Node JS", "React.js", "Next.js", "Interview", "Verizon", "Official"]}
+}, 
+{$set: { isProductive: true } }
+)
+
+
+db.timesheets.updateMany(
+{
+    subCategory: {$in: [ "64bdfca0ad4e4abe7b3b3b37",
+        "6503e5aa9e3a05dc6adffa06",
+        "6507ea4dbeb12d8732daded0",
+        "6503c6fcf6f9040cb09af0d8",
+        "64f1661d6e4da002e9dce4b2",
+        "6503c70cf6f9040cb09af0e0",
+        "64bdfc50ad4e4abe7b3b3b32",
+        "64ba307608aa5880409f1940",
+        "64f1661d6e4da002e9dce4b3"]}
+}, 
+{$set: { isProductive: true } }
+)
+
+/* Total productive hrs spend everyday */
+
+db.timesheets.aggregate([
+    {
+        $match: {
+            timesheetDate: {
+                $gte: new Date("2023-09-01"), 
+                $lt: new Date("2023-09-30") 
+            },
+            isProductive: true
+        }
+    }, 
+    {
+        $group: {
+            _id: "$timesheetDate",
+            totalHrs: {
+                $sum: {
+                    $dateDiff: {
+                        startDate: "$startTime",
+                        endDate: "$endTime",
+                        unit: "minute"
+                    }
+                }
+            }
+        }
+    }
+])
+
+
 
