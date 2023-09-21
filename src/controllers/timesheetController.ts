@@ -84,7 +84,7 @@ export const getDailyRecords = async (
       },
     })
       .select(
-        "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal"
+        "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal isProductive"
       )
       .populate("category", "name description subCategories")
       .exec();
