@@ -1,17 +1,5 @@
 import { Document, Model, Schema, model } from "mongoose";
-
-export interface ISubCategory extends Document {
-  name: string;
-  isProductive?: boolean;
-  description?: string;
-}
-
-export interface ICategory extends Document {
-  _id?: string;
-  name: string;
-  description?: string;
-  subCategories?: ISubCategory[];
-}
+import { ICategory, ISubCategory } from "../types/Category";
 
 // export interface iCategoryRequest extends ICategory, Document {
 //   isCategoryNameUnique(name: string): Promise<boolean>;

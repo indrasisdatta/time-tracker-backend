@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
-import { ITimesheet, Timesheet } from "../models/Timesheet";
+import { Timesheet } from "../models/Timesheet";
+
 import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
 import moment from "moment-timezone";
+import { ITimesheet } from "../types/Timesheet";
 // import { convertDatetoLocalTZ } from "../utils/helpers";
 // import * as moment from "moment-timezone";
 
@@ -115,8 +117,6 @@ export const getTimesheetSummary = async (
         $match: {
           timesheetDate: {
             $gte: new Date(startDate),
-            //$lt: moment(startDate).add(30, "hours"),
-            // $lt: moment.utc(endDate).add(1, "days").toDate(),
             $lte: new Date(endDate),
           },
         },
@@ -132,7 +132,7 @@ export const getTimesheetSummary = async (
       {
         $group: {
           _id: "$subCategory",
-          categoryData: { $first: "$categoryData.name" },
+          categoryData: { $first: "$categoryData" },
           subCategory: { $first: "$subCategory" },
           totalTime: {
             $sum: {

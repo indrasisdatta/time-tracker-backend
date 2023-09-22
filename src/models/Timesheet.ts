@@ -1,18 +1,8 @@
 import { Model, Schema, model } from "mongoose";
-import { ICategory, ISubCategory } from "./Category";
 import { convertDatetoLocalTZ } from "../utils/helpers";
 import moment from "moment-timezone";
+import { ITimesheet } from "../types/Timesheet";
 // import * as timezonePlugin from "mongoose-timezone";
-
-export interface ITimesheet extends Document {
-  timesheetDate: Date;
-  startTime: Date;
-  endTime: Date;
-  category: ICategory;
-  subCategory: string;
-  comments: string;
-  isProductive: boolean;
-}
 
 const timesheetSchema = new Schema(
   {
