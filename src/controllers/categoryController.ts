@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Category } from "../models/Category";
 import { API_STATUS } from "../config/constants";
-import mongoose, { Types, mongo } from "mongoose";
+import mongoose, { ObjectId, Types, mongo } from "mongoose";
 import { logger } from "../utils/logger";
 import { ISubCategory } from "../types/Category";
 
@@ -101,7 +101,7 @@ export const updateCategory = async (
           existingSubCat.description = newSubCat.description;
           return existingSubCat;
         }
-        newSubCat._id = new mongoose.Types.ObjectId();
+        newSubCat._id = new mongoose.Types.ObjectId() as unknown as ObjectId;
         /* Add subcategory */
         return newSubCat;
       });
