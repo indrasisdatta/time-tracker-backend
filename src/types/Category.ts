@@ -1,5 +1,8 @@
+import { ObjectId } from "mongoose";
+
 export interface ISubCategory extends Document {
-  _id?: string;
+  id?: string;
+  _id?: string | ObjectId;
   name: string;
   isProductive?: boolean;
   description?: string;
