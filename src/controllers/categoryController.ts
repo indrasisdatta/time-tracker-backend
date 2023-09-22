@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { Category, ISubCategory } from "../models/Category";
+import { Category } from "../models/Category";
 import { API_STATUS } from "../config/constants";
 import mongoose, { Types, mongo } from "mongoose";
 import { logger } from "../utils/logger";
+import { ISubCategory } from "../types/Category";
 
 export const getCategories = async (
   req: Request,
