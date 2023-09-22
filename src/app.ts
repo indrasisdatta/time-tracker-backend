@@ -13,11 +13,13 @@ const app: Express = express();
 let corsConfig = {};
 if (process.env.NODE_ENV === "local") {
   corsConfig = {
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://192.168.1.6:3000",
-    ],
+    origin: "*",
+    // origin: [
+    //   "http://localhost:3000",
+    //   "http://127.0.0.1:3000",
+    //   "http://192.168.1.6:3000",
+    //   "https://time-tracker-frontend-ebon.vercel.app",
+    // ],
   };
 }
 
