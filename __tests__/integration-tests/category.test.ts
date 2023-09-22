@@ -3,7 +3,8 @@ import request from "supertest";
 import { logger } from "../../src/utils/logger";
 // import mongoose, { ConnectOptions } from "mongoose";
 import server, { conn } from "../../src/server";
-import { Category, ISubCategory } from "../../src/models/Category";
+import { Category } from "../../src/models/Category";
+import { ISubCategory } from "../../src/types/Category";
 
 describe("Category Integration testing", () => {
   const uid = new Date().getTime();
