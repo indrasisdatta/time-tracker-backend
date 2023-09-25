@@ -53,7 +53,7 @@ export const convertDatetUTCString = (
   // const utcDateTime = localDateTime
   //   .utc()
   //   .format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ [(GMT)]");
-  const utcDateTime = new Date(`${timesheetDate} ${time}`).toUTCString();
+  const utcDateTime = new Date(localDateTime.toDate()).toUTCString();
   console.log("UTC date time:", utcDateTime);
   return utcDateTime;
 };
