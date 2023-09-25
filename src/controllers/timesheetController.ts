@@ -6,6 +6,7 @@ import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
 import moment from "moment-timezone";
 import { ITimesheet } from "../types/Timesheet";
+import { convertDatetoLocalTZ } from "../utils/helpers";
 // import { convertDatetoLocalTZ } from "../utils/helpers";
 // import * as moment from "moment-timezone";
 
@@ -40,14 +41,14 @@ export const saveTimesheet = async (
     /* 2. Insert data */
     const timesheetArr = timeslots.map((slot: ITimesheet) => {
       slot.timesheetDate = new Date(timesheetDate);
-      slot.startTime = new Date(`${timesheetDate} ${slot.startTime}`);
-      slot.endTime = new Date(`${timesheetDate} ${slot.endTime}`);
-      // slot.startTime = convertDatetoLocalTZ(
-      //   new Date(`${timesheetDate} ${slot.startTime}`).getTime()
-      // );
-      // slot.endTime = convertDatetoLocalTZ(
-      //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
-      // );
+      // slot.startTime = new Date(`${timesheetDate} ${slot.startTime}`);
+      // slot.endTime = new Date(`${timesheetDate} ${slot.endTime}`);
+      slot.startTime = convertDatetoLocalTZ(
+        new Date(`${timesheetDate} ${slot.startTime}`).getTime()
+      );
+      slot.endTime = convertDatetoLocalTZ(
+        new Date(`${timesheetDate} ${slot.endTime}`).getTime()
+      );
       return slot;
     });
     const timesheet = await Timesheet.insertMany(timeslots);
