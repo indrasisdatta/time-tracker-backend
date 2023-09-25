@@ -6,7 +6,11 @@ import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
 // import moment from "moment-timezone";
 import { ITimesheet } from "../types/Timesheet";
-import { convertDatetUTC, convertDatetoLocalTZ } from "../utils/helpers";
+import {
+  // convertDatetUTC,
+  convertDatetUTCString,
+  convertDatetoLocalTZ,
+} from "../utils/helpers";
 import moment from "moment";
 
 /* Add/update timesheet entry based on date */
@@ -20,7 +24,7 @@ export const saveTimesheet = async (
   const session: ClientSession = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { timesheetDate, timeslots } = req.body;
+    const { timesheetDate, timeslots, timezone } = req.body;
 
     if (!timeslots || timeslots.length == 0) {
       return res
@@ -48,17 +52,17 @@ export const saveTimesheet = async (
       // slot.endTime = convertDatetoLocalTZ(
       //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
       // );
-      logger.info(
-        "Old startTime",
-        new Date(`${timesheetDate} ${slot.startTime}`)
-      );
-      slot.startTime = moment
-        .utc(new Date(`${timesheetDate} ${slot.startTime}`).getTime())
-        .toDate();
-      logger.info("New startTime", slot.startTime);
-      slot.endTime = moment
-        .utc(new Date(`${timesheetDate} ${slot.endTime}`).getTime())
-        .toDate();
+      // logger.info(
+      //   "Old startTime",
+      //   new Date(`${timesheetDate} ${slot.startTime}`)
+      // );
+      // slot.startTime = moment
+      //   .utc(new Date(`${timesheetDate} ${slot.startTime}`).getTime())
+      //   .toDate();
+      // logger.info("New startTime", slot.startTime);
+      // slot.endTime = moment
+      //   .utc(new Date(`${timesheetDate} ${slot.endTime}`).getTime())
+      //   .toDate();
 
       // slot.startTime = convertDatetUTC(
       //   new Date(`${timesheetDate} ${slot.startTime}`).getTime()
@@ -66,6 +70,16 @@ export const saveTimesheet = async (
       // slot.endTime = convertDatetUTC(
       //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
       // );
+      slot.startTime = convertDatetUTCString(
+        timesheetDate,
+        slot.startTime,
+        process.env.TZ!
+      );
+      slot.endTime = convertDatetUTCString(
+        timesheetDate,
+        slot.endTime,
+        process.env.TZ!
+      );
       return slot;
     });
 

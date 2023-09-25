@@ -42,6 +42,18 @@ export const convertDatetoLocalTZ = (date = Date.now()): Date => {
   return moment.tz(date, process.env.TIME_ZONE!).toDate();
 };
 
-export const convertDatetUTC = (date = Date.now()): Date => {
-  return moment.utc(date).toDate();
+export const convertDatetUTCString = (
+  timesheetDate: string,
+  time: any,
+  timezone: string
+) => {
+  const localDateTime = moment.tz(`${timesheetDate} ${time}`, timezone);
+  console.log("Local date time:", localDateTime.toDate());
+  // const utcDateTime = localDateTime.clone().utc().toDate();
+  // const utcDateTime = localDateTime
+  //   .utc()
+  //   .format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ [(GMT)]");
+  const utcDateTime = new Date(`${timesheetDate} ${time}`).toUTCString();
+  console.log("UTC date time:", utcDateTime);
+  return utcDateTime;
 };
