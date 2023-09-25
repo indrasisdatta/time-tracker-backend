@@ -4,11 +4,10 @@ import { Timesheet } from "../models/Timesheet";
 
 import mongoose, { ClientSession } from "mongoose";
 import { API_STATUS } from "../config/constants";
-import moment from "moment-timezone";
+// import moment from "moment-timezone";
 import { ITimesheet } from "../types/Timesheet";
 import { convertDatetUTC, convertDatetoLocalTZ } from "../utils/helpers";
-// import { convertDatetoLocalTZ } from "../utils/helpers";
-// import * as moment from "moment-timezone";
+import moment from "moment";
 
 /* Add/update timesheet entry based on date */
 export const saveTimesheet = async (
@@ -49,14 +48,29 @@ export const saveTimesheet = async (
       // slot.endTime = convertDatetoLocalTZ(
       //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
       // );
-      slot.startTime = convertDatetUTC(
-        new Date(`${timesheetDate} ${slot.startTime}`).getTime()
+      logger.info(
+        "Old startTime",
+        new Date(`${timesheetDate} ${slot.startTime}`)
       );
-      slot.endTime = convertDatetUTC(
-        new Date(`${timesheetDate} ${slot.endTime}`).getTime()
-      );
+      slot.startTime = moment
+        .utc(new Date(`${timesheetDate} ${slot.startTime}`).getTime())
+        .toDate();
+      logger.info("New startTime", slot.startTime);
+      slot.endTime = moment
+        .utc(new Date(`${timesheetDate} ${slot.endTime}`).getTime())
+        .toDate();
+
+      // slot.startTime = convertDatetUTC(
+      //   new Date(`${timesheetDate} ${slot.startTime}`).getTime()
+      // );
+      // slot.endTime = convertDatetUTC(
+      //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
+      // );
       return slot;
     });
+
+    logger.info("Check timeslots", timeslots);
+
     const timesheet = await Timesheet.insertMany(timeslots);
     logger.info("Timesheet saved", timesheet);
     await session.commitTransaction();
