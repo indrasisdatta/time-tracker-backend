@@ -70,16 +70,11 @@ export const saveTimesheet = async (
       // slot.endTime = convertDatetUTC(
       //   new Date(`${timesheetDate} ${slot.endTime}`).getTime()
       // );
-      slot.startTime = convertDatetUTCString(
-        timesheetDate,
-        slot.startTime,
-        process.env.TZ!
-      );
-      slot.endTime = convertDatetUTCString(
-        timesheetDate,
-        slot.endTime,
-        process.env.TZ!
-      );
+      slot.startTime = convertDatetUTCString(timesheetDate, slot.startTime);
+      slot.endTime = convertDatetUTCString(timesheetDate, slot.endTime);
+      // slot.startTime = `${timesheetDate}T${slot.startTime}:00+5:30`;
+      // slot.startTime = new Date(slot.startTime).toUTCString();
+
       return slot;
     });
 
