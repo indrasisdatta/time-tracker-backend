@@ -41,3 +41,7 @@ export const validateTimeSlots = (timeSlots: TimeSlot[]) => {
 export const convertDatetoLocalTZ = (date = Date.now()): Date => {
   return moment.tz(date, process.env.TIME_ZONE!).toDate();
 };
+
+export const convertDatetUTC = (date = Date.now()): Date => {
+  return moment.utc(date).toDate();
+};
