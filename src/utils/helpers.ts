@@ -1,4 +1,5 @@
 import * as moment from "moment-timezone";
+import momentjs from "moment";
 
 type TimeSlot = {
   startTime: string;
@@ -56,4 +57,40 @@ export const convertDatetUTCString = (timesheetDate: string, time: any) => {
   // const utcDateTime = new Date(localDateTime.toDate()).toUTCString();
   // console.log("UTC date time:", utcDateTime);
   // return utcDateTime;
+};
+
+/* Calculate next Friday */
+const getNextFriday = (date = new Date()) => {
+  const dateCopy = new Date(date.getTime());
+  const nextFriday = new Date(
+    dateCopy.setDate(
+      dateCopy.getDate() + ((7 - dateCopy.getDay() + 5) % 7 || 7)
+    )
+  );
+  return nextFriday;
+};
+
+/**
+ * Return weeks of month with start and end dates
+ * @param year
+ * @param month
+ * @returns weeks [ {start, end}, {start, end} ]
+ */
+export const getWeeksOfMonth = (year: number, month: number) => {
+  const startDate = new Date(year, month, 1);
+  /* Day starts on Monday of this week (even if it's end of prev month) */
+  startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+  /* Last day of month 28/20/31 */
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const weeks = [];
+  /* Loop till end of month and create weeks array with start and end date */
+  while (startDate.getMonth() <= lastDayOfMonth.getMonth()) {
+    const nextDate = getNextFriday(startDate);
+    weeks.push({
+      start: `${momentjs(startDate).format("YYYY-MM-DD")} 00:00:00+000`,
+      end: `${momentjs(nextDate).format("YYYY-MM-DD")} 00:00:00+000`,
+    });
+    startDate.setDate(startDate.getDate() + 7);
+  }
+  return weeks;
 };
