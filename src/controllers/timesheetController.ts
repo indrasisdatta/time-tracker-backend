@@ -294,7 +294,9 @@ export const getWeeklyProductiveTime = async (
           },
           {
             $group: {
-              _id: "$timesheetDate",
+              // _id: "$timesheetDate",
+              _id: { $week: "$timesheetDate" },
+              distinctDates: { $addToSet: "$timesheetDate" },
               week: { $first: week },
               totalProductive: {
                 $sum: {
@@ -304,6 +306,15 @@ export const getWeeklyProductiveTime = async (
                     unit: "minute",
                   },
                 },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              totalProductiveMins: { $first: "$totalProductive" },
+              workingDays: {
+                $sum: { $size: "$distinctDates" },
               },
             },
           },
