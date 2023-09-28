@@ -10,6 +10,7 @@ import {
   // convertDatetUTC,
   convertDatetUTCString,
   convertDatetoLocalTZ,
+  getWeeksOfMonth,
 } from "../utils/helpers";
 import moment from "moment";
 
@@ -251,6 +252,82 @@ export const timesheetCalendar = async (
         .json({ status: API_STATUS.SUCCESS, data: calendarData });
     }
     return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
+  } catch (error) {
+    logger.error("Calendar error: ", error);
+    return res.status(500).json({
+      status: API_STATUS.ERROR,
+      data: [],
+      error,
+    });
+  }
+};
+
+export const getWeeklyProductiveTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { yearMonth } = req.params;
+    if (!yearMonth) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: [],
+        error: "Missing year month param",
+      });
+    }
+    const [yy, mm] = yearMonth.split("-");
+    const weeksArr = getWeeksOfMonth(+yy, +mm - 1);
+    let response: any = [];
+    if (weeksArr && weeksArr.length > 0) {
+      // weeksArr.map((week) => {
+      for (let week of weeksArr) {
+        let records = await Timesheet.aggregate([
+          {
+            $match: {
+              timesheetDate: {
+                $gte: new Date(week.start),
+                $lte: new Date(week.end),
+              },
+              isProductive: true,
+            },
+          },
+          {
+            $group: {
+              // _id: "$timesheetDate",
+              _id: { $week: "$timesheetDate" },
+              distinctDates: { $addToSet: "$timesheetDate" },
+              week: { $first: week },
+              totalProductive: {
+                $sum: {
+                  $dateDiff: {
+                    startDate: "$startTime",
+                    endDate: "$endTime",
+                    unit: "minute",
+                  },
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              totalProductiveMins: { $first: "$totalProductive" },
+              workingDays: {
+                $sum: { $size: "$distinctDates" },
+              },
+            },
+          },
+        ]);
+        response = [...response, ...records];
+      }
+    }
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: response,
+      error: null,
+    });
   } catch (error) {
     logger.error("Calendar error: ", error);
     return res.status(500).json({
