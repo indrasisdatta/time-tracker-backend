@@ -312,6 +312,7 @@ export const getWeeklyProductiveTime = async (
           {
             $group: {
               _id: "$_id",
+              week: { $first: week },
               totalProductiveMins: { $first: "$totalProductive" },
               workingDays: {
                 $sum: { $size: "$distinctDates" },
