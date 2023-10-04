@@ -120,6 +120,7 @@ export const getDailyRecords = async (
         "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal isProductive"
       )
       .populate("category", "name description subCategories")
+      .sort({ startTime: "asc" })
       .exec();
 
     if (records) {
