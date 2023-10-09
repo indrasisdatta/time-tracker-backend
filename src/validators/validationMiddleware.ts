@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
+  reportSearchSchema,
   timesheetSchema,
   timesheetSummarySchema,
 } from "./validationSchema";
@@ -19,6 +20,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "timesheet_summary":
         schema = timesheetSummarySchema;
+        break;
+      case "report_search":
+        schema = reportSearchSchema;
         break;
     }
     if (!schema) {

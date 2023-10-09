@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getDailyRecords,
+  getReportData,
   getTimesheetSummary,
   getWeeklyProductiveTime,
   saveTimesheet,
@@ -22,5 +23,6 @@ router.post(
   validationMiddleware("timesheet_summary"),
   timesheetCalendar
 );
+router.post("/report", validationMiddleware("report_search"), getReportData);
 
 export default router;

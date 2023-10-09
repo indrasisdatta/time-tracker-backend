@@ -21,7 +21,7 @@ const timesheetSchema = new Schema(
       default: () => convertDatetoLocalTZ(),
     },
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
-    subCategory: { type: String, required: true },
+    subCategory: { type: Schema.Types.ObjectId, required: true },
     comments: { type: String },
     isProductive: { type: Boolean },
   },

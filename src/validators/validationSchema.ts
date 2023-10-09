@@ -124,3 +124,20 @@ export const timesheetSummarySchema = Joi.object({
     "date.format": "Enter End date in YYYY-MM-DD format",
   }),
 });
+
+export const reportSearchSchema = Joi.object({
+  startDate: Joi.date().required().messages({
+    "any.required": "Enter Start date in YYYY-MM-DD format",
+    "date.empty": "Enter Start date in YYYY-MM-DD format",
+    "date.base": "Enter Start date in YYYY-MM-DD format",
+  }),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).required().messages({
+    "any.required": "Enter End date in YYYY-MM-DD format",
+    "date.empty": "Enter End date in YYYY-MM-DD format",
+    "date.min": "End date cannot be less than start date",
+    "date.format": "Enter End date in YYYY-MM-DD format",
+  }),
+  category: Joi.any().optional().allow(null, ""),
+  subCategory: Joi.any().optional().allow(null, ""),
+  sortBy: Joi.any().optional().allow(null, ""),
+});
