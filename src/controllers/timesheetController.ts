@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
 import { Timesheet } from "../models/Timesheet";
 
-import mongoose, { ClientSession } from "mongoose";
+import mongoose, { ClientSession, Types } from "mongoose";
 import { API_STATUS } from "../config/constants";
 // import moment from "moment-timezone";
 import { ITimesheet, ReportCondition } from "../types/Timesheet";
@@ -348,7 +348,7 @@ export const getReportData = async (
 ) => {
   try {
     const { startDate, endDate, category, subCategory, sortBy } = req.body;
-    const conditions: ReportCondition = {
+    const conditions: any = {
       timesheetDate: {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
@@ -360,12 +360,11 @@ export const getReportData = async (
         [sortBy.field]: sortBy.type === "asc" ? 1 : -1,
       };
     }
-
     if (category) {
-      conditions.category = category;
+      conditions.category = new Types.ObjectId(category);
     }
     if (subCategory) {
-      conditions.subCategory = subCategory;
+      conditions.subCategory = new Types.ObjectId(subCategory);
     }
 
     const timesheetSummary = await Timesheet.aggregate([
