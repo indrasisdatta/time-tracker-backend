@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
   reportSearchSchema,
+  signupUserSchema,
   timesheetSchema,
   timesheetSummarySchema,
 } from "./validationSchema";
@@ -23,6 +24,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "report_search":
         schema = reportSearchSchema;
+        break;
+      case "user_signup":
+        schema = signupUserSchema;
         break;
     }
     if (!schema) {
