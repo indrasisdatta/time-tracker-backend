@@ -2,7 +2,6 @@ import { Model, Schema, model } from "mongoose";
 import { convertDatetoLocalTZ } from "../utils/helpers";
 import moment from "moment-timezone";
 import { ITimesheet } from "../types/Timesheet";
-// import * as timezonePlugin from "mongoose-timezone";
 
 const timesheetSchema = new Schema(
   {
