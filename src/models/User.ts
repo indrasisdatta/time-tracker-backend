@@ -2,12 +2,12 @@ import { Model, Schema, model } from "mongoose";
 import { IUser } from "../types/User";
 import bcrypt from "bcrypt";
 
-interface UserModel extends Model<IUser> {
-  isExistingEmail(email: string): Promise<IUser | null>;
-}
-
 interface UserMethods {
   isValidPassword(password: string): Promise<boolean>;
+}
+
+interface UserModel extends Model<IUser, any, UserMethods, any> {
+  isExistingEmail(email: string): Promise<IUser | null>;
 }
 
 const UserSchema = new Schema<IUser, UserModel, UserMethods>(

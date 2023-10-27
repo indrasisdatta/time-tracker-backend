@@ -26,11 +26,6 @@ export const signupUserSchema = Joi.object({
       if (isExisting) {
         throw new Error("Email already exists");
       }
-      // let findCondition: any = { email };
-      // const isExisting = await User.findOne({ email });
-      // if (isExisting) {
-      //   throw new Error("Email already exists");
-      // }
       return email;
     })
     .messages({

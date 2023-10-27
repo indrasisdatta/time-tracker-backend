@@ -12,7 +12,7 @@ passport.use(
     },
     async function (email, password, cb) {
       try {
-        const user: IUser | null = await User.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
           return cb(null, false, { message: "Incorrect email." });
         }
@@ -48,3 +48,5 @@ passport.use(
     }
   )
 );
+
+export default passport;
