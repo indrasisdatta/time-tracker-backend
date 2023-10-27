@@ -22,11 +22,15 @@ export const signupUserSchema = Joi.object({
     .email()
     .external(async (email, helpers) => {
       logger.info(`Email Context:`, helpers.prefs.context);
-      let findCondition: any = { email };
-      const isExisting = await User.findOne({ email });
+      const isExisting = await User.isExistingEmail(email);
       if (isExisting) {
         throw new Error("Email already exists");
       }
+      // let findCondition: any = { email };
+      // const isExisting = await User.findOne({ email });
+      // if (isExisting) {
+      //   throw new Error("Email already exists");
+      // }
       return email;
     })
     .messages({

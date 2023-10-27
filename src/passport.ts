@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { User } from "./models/User";
 import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
+import { IUser } from "./types/User";
 
 passport.use(
   new LocalStrategy(
@@ -11,10 +12,15 @@ passport.use(
     },
     async function (email, password, cb) {
       try {
-        const user = await User.findOne({ email, password });
+        const user: IUser | null = await User.findOne({ email });
         if (!user) {
-          return cb(null, false, { message: "Incorrect email or password." });
+          return cb(null, false, { message: "Incorrect email." });
         }
+        const validate = await user.isValidPassword(password);
+        if (!validate) {
+          return cb(null, false, { message: "Invalid password." });
+        }
+
         return cb(null, user, { message: "Login successful." });
       } catch (e) {
         return cb(e);

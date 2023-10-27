@@ -1,7 +1,16 @@
 import { Model, Schema, model } from "mongoose";
 import { IUser } from "../types/User";
 import bcrypt from "bcrypt";
-const UserSchema = new Schema(
+
+interface UserModel extends Model<IUser> {
+  isExistingEmail(email: string): Promise<IUser | null>;
+}
+
+interface UserMethods {
+  isValidPassword(password: string): Promise<boolean>;
+}
+
+const UserSchema = new Schema<IUser, UserModel, UserMethods>(
   {
     email: { type: "string", required: true, unique: true },
     firstName: { type: "string" },
@@ -15,13 +24,18 @@ const UserSchema = new Schema(
 UserSchema.pre("save", async function (next) {
   const user = this;
   const hash = await bcrypt.hash((user as IUser).password, 10);
+  this.password = hash;
   next();
 });
 
+UserSchema.statics.isExistingEmail = async function (email: string) {
+  return await this.findOne({ email });
+};
+
 UserSchema.methods.isValidPassword = async function (password: string) {
   const user = this;
-  const compare = await bcrypt.compare(password, (user as IUser).password);
+  const compare = await bcrypt.compare(password, user.password);
   return compare;
 };
 
-export const User: Model<IUser> = model<IUser>("User", UserSchema);
+export const User = model<IUser, UserModel>("User", UserSchema);
