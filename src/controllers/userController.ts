@@ -3,6 +3,7 @@ import { logger } from "../utils/logger";
 import { API_STATUS } from "../config/constants";
 import { User } from "../models/User";
 import passport from "passport";
+import jwt from "jsonwebtoken";
 
 export const signupSave = async (
   req: Request,
@@ -35,22 +36,60 @@ export const signinUser = async (
   res: Response,
   next: NextFunction
 ) => {
+  // try {
+
   try {
     const { email, password } = req.body;
-
-    const pass = await passport.authenticate("local", { session: false })(
-      req,
-      res
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        error: "Incorrect email.",
+        data: null,
+      });
+    }
+    const validate = await user.isValidPassword(password);
+    if (!validate) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        error: "Invalid password.",
+        data: null,
+      });
+    }
+    /* Valid user, so generate access and refresh token */
+    const accessToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        expire:
+          Date.now() + 3600 * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY!),
+      },
+      process.env.JWT_SECRET!
+    );
+    const refreshToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        expire:
+          Date.now() + 3600 * Number(process.env.JWT_REFRESH_TOKEN_EXPIRY!),
+      },
+      process.env.JWT_SECRET!
     );
 
-    console.log(pass);
-    // , (err, user, info) => {
-    //   console.log("Passport authenticate");
-    // });
-
-    res.status(400).json({ status: API_STATUS.ERROR, data: null });
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: { accessToken, refreshToken },
+    });
   } catch (error) {
-    logger.info(`Signup error: ${JSON.stringify(error)}`);
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
+
+  // passport.authenticate(
+  //   "local",
+  //   { session: false },
+  //   (err: any, user: any, info: any) => {
+  //     console.log("Authenticate check");
+  //     console.log(err, user, info);
+  //   }
+  // )(req, res, next);
 };

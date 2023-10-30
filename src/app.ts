@@ -5,7 +5,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import swaggerUI from "swagger-ui-express";
 import * as swaggerDocument from "./swagger.json";
-import passport from "./passport";
+// import passport from "./passport";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
