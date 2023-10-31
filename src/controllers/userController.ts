@@ -4,6 +4,7 @@ import { API_STATUS } from "../config/constants";
 import { User } from "../models/User";
 import passport from "passport";
 import jwt from "jsonwebtoken";
+import { IUser } from "../types/User";
 
 export const signupSave = async (
   req: Request,
@@ -36,8 +37,6 @@ export const signinUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  // try {
-
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -61,8 +60,7 @@ export const signinUser = async (
       {
         id: user.id,
         email: user.email,
-        expire:
-          Date.now() + 3600 * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY!),
+        expire: Date.now() + 3600 * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY),
       },
       process.env.JWT_SECRET!
     );
@@ -71,7 +69,7 @@ export const signinUser = async (
         id: user.id,
         email: user.email,
         expire:
-          Date.now() + 3600 * Number(process.env.JWT_REFRESH_TOKEN_EXPIRY!),
+          Date.now() + 3600 * Number(process.env.JWT_REFRESH_TOKEN_EXPIRY),
       },
       process.env.JWT_SECRET!
     );
@@ -83,13 +81,28 @@ export const signinUser = async (
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
+};
 
-  // passport.authenticate(
-  //   "local",
-  //   { session: false },
-  //   (err: any, user: any, info: any) => {
-  //     console.log("Authenticate check");
-  //     console.log(err, user, info);
-  //   }
-  // )(req, res, next);
+export const getUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req;
+    if (!user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: null,
+        error: "User not found",
+      });
+    }
+    // let tempUser = { ...user };
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
 };
