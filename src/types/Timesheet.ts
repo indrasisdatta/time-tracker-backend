@@ -9,3 +9,9 @@ export interface ITimesheet extends Document {
   comments: string;
   isProductive: boolean;
 }
+
+export interface ReportCondition {
+  timesheetDate: any;
+  category?: string;
+  subCategory?: string;
+}

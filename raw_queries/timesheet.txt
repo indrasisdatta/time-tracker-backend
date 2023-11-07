@@ -185,3 +185,21 @@ db.getCollection("timesheets").aggregate([
             }
         }
 ])
+
+/* UPDATE TIMSHEET subCategory datatype from string to ObjectId */
+
+db.timesheets.update(
+    {},
+    [{
+        $set: {
+            subCategory: {
+              $convert: {
+                    input: "$subCategory",
+                    to: "objectId",
+                    onError: null
+                }
+            }
+        }
+    }],
+    { multi: true }
+)
