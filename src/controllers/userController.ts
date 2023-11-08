@@ -5,6 +5,7 @@ import { User } from "../models/User";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { IUser } from "../types/User";
+import { Mailer } from "../utils/mailer";
 
 export const signupSave = async (
   req: Request,
@@ -78,6 +79,34 @@ export const signinUser = async (
       status: API_STATUS.SUCCESS,
       data: { accessToken, refreshToken },
     });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
+export const forgotPwdAction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.isExistingEmail(req.body.email);
+    console.log("User found: ", user);
+    if (!user) {
+      return res
+        .status(400)
+        .json({ status: API_STATUS.ERROR, error: "User not found" });
+    }
+    const mailer = Mailer.getInstance();
+    await mailer.createConnection();
+    const mailStatus = await mailer.sendMail({
+      to: user.email,
+      subject: "Reset your password",
+      text: "This is a test mail",
+      html: "This is a <strong>test</strong> mail",
+    });
+    console.log("mailStatus", mailStatus);
+    res.status(200).json({ status: API_STATUS.SUCCESS, data: mailStatus });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }

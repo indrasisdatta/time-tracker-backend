@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
+  forgotPwdSchema,
   reportSearchSchema,
   signupUserSchema,
   timesheetSchema,
@@ -27,6 +28,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "user_signup":
         schema = signupUserSchema;
+        break;
+      case "forgot_pwd":
+        schema = forgotPwdSchema;
         break;
     }
     if (!schema) {

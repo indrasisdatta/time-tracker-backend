@@ -3,6 +3,7 @@ import {
   signupSave,
   signinUser,
   getUserProfile,
+  forgotPwdAction,
 } from "../controllers/userController";
 
 import { validationMiddleware } from "../validators/validationMiddleware";
@@ -13,6 +14,11 @@ const router = Router();
 
 router.post("/signup", validationMiddleware("user_signup"), signupSave);
 router.post("/login", signinUser);
+router.post(
+  "/forgot-password",
+  validationMiddleware("forgot_pwd"),
+  forgotPwdAction
+);
 router.get(
   "/profile",
   // passport.authenticate("jwt", { session: false }),

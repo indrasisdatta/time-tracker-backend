@@ -4,6 +4,8 @@ import { logger } from "../utils/logger";
 import { validateTimeSlots } from "../utils/helpers";
 import { User } from "../models/User";
 
+/* User schemas */
+
 export const signupUserSchema = Joi.object({
   firstName: Joi.string().required().messages({
     "any.required": "First name is required",
@@ -47,6 +49,27 @@ export const signupUserSchema = Joi.object({
       "any.only": "Password and Confirm Password fields don't match",
     }),
 });
+
+export const forgotPwdSchema = Joi.object({
+  email: Joi.string()
+    .required()
+    .email()
+    // .external(async (email, helpers) => {
+    //   logger.info(`Email Context:`, helpers.prefs.context);
+    //   const isExisting = await User.isExistingEmail(email);
+    //   if (!isExisting) {
+    //     throw new Error("Email doesn't exist.");
+    //   }
+    //   return email;
+    // })
+    .messages({
+      "any.required": "Email is required",
+      "string.empty": "Email is required",
+      "string.email": "Email format is invalid",
+    }),
+});
+
+/* Category schema */
 
 export const categorySchema = Joi.object({
   name: Joi.string()
@@ -116,6 +139,8 @@ export const categorySchema = Joi.object({
     )
     .required(),
 });
+
+/* Calendar/timesheet schemas */
 
 export const timesheetSchema = Joi.object({
   timesheetDate: Joi.string().required().messages({
