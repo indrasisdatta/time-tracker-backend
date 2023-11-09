@@ -94,3 +94,7 @@ export const getWeeksOfMonth = (year: number, month: number) => {
   }
   return weeks;
 };
+
+export const convertHtmlToText = (str: string) => {
+  return str.replace(/<[^>]+>/g, "");
+};

@@ -6,6 +6,11 @@ import passport from "passport";
 import jwt from "jsonwebtoken";
 import { IUser } from "../types/User";
 import { Mailer } from "../utils/mailer";
+import { readFile, readFileSync } from "fs";
+import Handlebars from "handlebars";
+import { v4 as uuidv4 } from "uuid";
+import { ResetPwdToken } from "../models/ResetPwdToken";
+import { convertHtmlToText } from "../utils/helpers";
 
 export const signupSave = async (
   req: Request,
@@ -90,22 +95,43 @@ export const forgotPwdAction = async (
   next: NextFunction
 ) => {
   try {
+    // console.log('Client url: ', clientUrl);
     const user = await User.isExistingEmail(req.body.email);
-    console.log("User found: ", user);
+    // console.log("User found: ", user);
     if (!user) {
       return res
         .status(400)
         .json({ status: API_STATUS.ERROR, error: "User not found" });
     }
+    /* Save reset password token for this user */
+    let resetTokenObj = await ResetPwdToken.findOne({ user: user._id });
+    if (!resetTokenObj) {
+      resetTokenObj = await new ResetPwdToken({
+        token: uuidv4(),
+        user: user._id,
+      }).save();
+    }
+
+    /* Generate reset password email template */
+    const resetHtml = await readFileSync("emailTemplates/resetPassword.html", {
+      encoding: "utf-8",
+    });
+    const resetUrl = `${process.env.CLIENT_BASE_URL}/auth/reset-password/${resetTokenObj.token}`;
+    const resetTemplate = Handlebars.compile(resetHtml)({
+      firstName: user.firstName,
+      resetUrl,
+    });
+
+    /* Send reset password email */
     const mailer = Mailer.getInstance();
     await mailer.createConnection();
     const mailStatus = await mailer.sendMail({
       to: user.email,
       subject: "Reset your password",
-      text: "This is a test mail",
-      html: "This is a <strong>test</strong> mail",
+      text: convertHtmlToText(resetTemplate),
+      html: resetTemplate,
     });
-    console.log("mailStatus", mailStatus);
+    // console.log("mailStatus", mailStatus);
     res.status(200).json({ status: API_STATUS.SUCCESS, data: mailStatus });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
