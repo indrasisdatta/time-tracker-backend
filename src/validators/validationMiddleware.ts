@@ -3,6 +3,7 @@ import {
   categorySchema,
   forgotPwdSchema,
   reportSearchSchema,
+  resetPwdSaveSchema,
   signupUserSchema,
   timesheetSchema,
   timesheetSummarySchema,
@@ -31,6 +32,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "forgot_pwd":
         schema = forgotPwdSchema;
+        break;
+      case "reset_pwd":
+        schema = resetPwdSaveSchema;
         break;
     }
     if (!schema) {

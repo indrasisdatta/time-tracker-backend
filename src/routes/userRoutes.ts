@@ -4,6 +4,8 @@ import {
   signinUser,
   getUserProfile,
   forgotPwdAction,
+  resetPasswordTokenCheck,
+  resetPasswordSave,
 } from "../controllers/userController";
 
 import { validationMiddleware } from "../validators/validationMiddleware";
@@ -25,5 +27,12 @@ router.get(
   Auth,
   getUserProfile
 );
+router.post(
+  "/reset-password",
+  validationMiddleware("reset_pwd"),
+  resetPasswordSave
+);
+
+router.get("/reset-password/:resetToken", resetPasswordTokenCheck);
 
 export default router;

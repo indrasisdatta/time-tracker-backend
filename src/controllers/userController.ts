@@ -11,7 +11,9 @@ import Handlebars from "handlebars";
 import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
 import { convertHtmlToText } from "../utils/helpers";
+import { ClientSession, startSession } from "mongoose";
 
+/* User sign up */
 export const signupSave = async (
   req: Request,
   res: Response,
@@ -38,6 +40,7 @@ export const signupSave = async (
   }
 };
 
+/* User login */
 export const signinUser = async (
   req: Request,
   res: Response,
@@ -89,6 +92,7 @@ export const signinUser = async (
   }
 };
 
+/* Forgot pwd (save token and email pwd reset link) */
 export const forgotPwdAction = async (
   req: Request,
   res: Response,
@@ -132,12 +136,80 @@ export const forgotPwdAction = async (
       html: resetTemplate,
     });
     // console.log("mailStatus", mailStatus);
-    res.status(200).json({ status: API_STATUS.SUCCESS, data: mailStatus });
+    res.status(200).json({ status: API_STATUS.SUCCESS, data: resetTokenObj });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
 
+/* Validate reset token */
+export const resetPasswordTokenCheck = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { resetToken } = req.params;
+
+    const existingToken = await ResetPwdToken.findOne({
+      token: resetToken,
+    }).populate("user", "_id email firstName lastName");
+    if (existingToken) {
+      return res
+        .status(200)
+        .json({ status: API_STATUS.SUCCESS, data: existingToken });
+    }
+    res.status(400).json({
+      status: API_STATUS.ERROR,
+      error: `Reset password  URL is either invalid or expired already.`,
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
+/* Reset pwd DB save */
+export const resetPasswordSave = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const session: ClientSession = await startSession();
+  session.startTransaction();
+  try {
+    /* DB save password  */
+    const { resetToken, password } = req.body;
+    const existingToken = await ResetPwdToken.findOne({
+      token: resetToken,
+    }).populate("user");
+    if (!existingToken) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        error: `Reset password  URL is either invalid or expired already.`,
+      });
+    }
+    existingToken.user.password = password;
+    await (existingToken.user as any).save();
+
+    /* Delete data from resetPassword collection */
+    await ResetPwdToken.findOneAndDelete({
+      token: resetToken,
+    });
+    await session.commitTransaction();
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: 1,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  } finally {
+    session.endSession();
+  }
+};
+
+/* User profile details */
 export const getUserProfile = async (
   req: Request,
   res: Response,
