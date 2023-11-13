@@ -6,7 +6,7 @@ const ResetPwdTokenSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: process.env.RESET_PWD_EXPIRY_SECS,
+    expires: Number(process.env.RESET_PWD_EXPIRY_SECS ?? 3600) * 1000,
   },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });

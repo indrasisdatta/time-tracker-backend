@@ -85,11 +85,22 @@ export const resetPwdSaveSchema = Joi.object({
     "any.required": "Reset token is required",
     "string.empty": "Reset token is required",
   }),
-  password: Joi.string().required().messages({
-    "any.required": "Password is required",
-    "string.empty": "Password is required",
-  }),
-  confirmPassword: Joi.string()
+  password: Joi.string()
+    .required()
+    .regex(/[ -~]*[a-z][ -~]*/) // at least 1 lower-case
+    .regex(/[ -~]*[A-Z][ -~]*/) // at least 1 upper-case
+    .regex(/[ -~]*(?=[ -~])[^0-9a-zA-Z][ -~]*/) // at least 1 special character
+    .regex(/[ -~]*[0-9][ -~]*/) // at least 1 number
+    .min(6)
+    .label("Password")
+    .messages({
+      "any.required": "Password is required",
+      "string.empty": "Password is required",
+      "string.min": "Password should have at least 6 characters",
+      "object.regex":
+        "Password should have at least 1 lower case, 1 upper case and 1 special character",
+    }),
+  confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
     .required()
     .label("Confirm Password")
