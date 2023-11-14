@@ -83,9 +83,26 @@ export const signinUser = async (
       process.env.JWT_SECRET!
     );
 
+    const {
+      firstName,
+      lastName,
+      role,
+    }: { firstName: string; lastName: string; role: string } = {
+      ...user.toObject(),
+    };
+
     return res.status(200).json({
       status: API_STATUS.SUCCESS,
-      data: { accessToken, refreshToken },
+      data: {
+        accessToken,
+        refreshToken,
+        userInfo: {
+          firstName,
+          lastName,
+          email,
+          role,
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
