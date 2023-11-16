@@ -1,9 +1,10 @@
 import { Transporter, createTransport } from "nodemailer";
 import { MailParams } from "../types/Mail";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export class Mailer {
   private static instance: Mailer;
-  private transporter: Transporter;
+  private transporter!: Transporter;
 
   private constructor() {}
 
@@ -23,7 +24,7 @@ export class Mailer {
         user: process.env.SMTP_USERNAME,
         pass: process.env.SMTP_PASSWORD,
       },
-    });
+    } as SMTPTransport.Options);
   }
 
   async sendMail(options: MailParams) {

@@ -6,7 +6,36 @@ import { User } from "../models/User";
 
 /* User schemas */
 
+// Reusable password schema
+export const passwordSchema = {
+  password: Joi.string()
+    .required()
+    .regex(/[ -~]*[a-z][ -~]*/) // at least 1 lower-case
+    .regex(/[ -~]*[A-Z][ -~]*/) // at least 1 upper-case
+    .regex(/[ -~]*(?=[ -~])[^0-9a-zA-Z][ -~]*/) // at least 1 special character
+    .regex(/[ -~]*[0-9][ -~]*/) // at least 1 number
+    .min(6)
+    .label("Password")
+    .messages({
+      "any.required": "Password is required",
+      "string.empty": "Password is required",
+      "string.min": "Password should have at least 6 characters",
+      "string.pattern.base":
+        "Password should have at least 1 lower case, 1 upper case and 1 special character",
+    }),
+  confirmPassword: Joi.any()
+    .equal(Joi.ref("password"))
+    .required()
+    .label("Confirm Password")
+    .messages({
+      "any.required": "Confirm Password is required",
+      "string.empty": "Confirm Password is required",
+      "any.only": "Password and Confirm Password fields don't match",
+    }),
+};
+
 export const signupUserSchema = Joi.object({
+  ...passwordSchema,
   firstName: Joi.string().required().messages({
     "any.required": "First name is required",
     "string.empty": "First name is required",
@@ -35,30 +64,6 @@ export const signupUserSchema = Joi.object({
       "string.empty": "Email is required",
       "string.email": "Email format is invalid",
     }),
-  password: Joi.string()
-    .required()
-    .regex(/[ -~]*[a-z][ -~]*/) // at least 1 lower-case
-    .regex(/[ -~]*[A-Z][ -~]*/) // at least 1 upper-case
-    .regex(/[ -~]*(?=[ -~])[^0-9a-zA-Z][ -~]*/) // at least 1 special character
-    .regex(/[ -~]*[0-9][ -~]*/) // at least 1 number
-    .min(6)
-    .label("Password")
-    .messages({
-      "any.required": "Password is required",
-      "string.empty": "Password is required",
-      "string.min": "Password should have at least 6 characters",
-      "object.regex":
-        "Password should have at least 1 lower case, 1 upper case and 1 special character",
-    }),
-  confirmPassword: Joi.any()
-    .equal(Joi.ref("password"))
-    .required()
-    .label("Confirm Password")
-    .messages({
-      "any.required": "Confirm Password is required",
-      "string.empty": "Confirm Password is required",
-      "any.only": "Password and Confirm Password fields don't match",
-    }),
 });
 
 export const forgotPwdSchema = Joi.object({
@@ -81,34 +86,15 @@ export const forgotPwdSchema = Joi.object({
 });
 
 export const resetPwdSaveSchema = Joi.object({
+  ...passwordSchema,
   resetToken: Joi.string().required().messages({
     "any.required": "Reset token is required",
     "string.empty": "Reset token is required",
   }),
-  password: Joi.string()
-    .required()
-    .regex(/[ -~]*[a-z][ -~]*/) // at least 1 lower-case
-    .regex(/[ -~]*[A-Z][ -~]*/) // at least 1 upper-case
-    .regex(/[ -~]*(?=[ -~])[^0-9a-zA-Z][ -~]*/) // at least 1 special character
-    .regex(/[ -~]*[0-9][ -~]*/) // at least 1 number
-    .min(6)
-    .label("Password")
-    .messages({
-      "any.required": "Password is required",
-      "string.empty": "Password is required",
-      "string.min": "Password should have at least 6 characters",
-      "object.regex":
-        "Password should have at least 1 lower case, 1 upper case and 1 special character",
-    }),
-  confirmPassword: Joi.any()
-    .equal(Joi.ref("password"))
-    .required()
-    .label("Confirm Password")
-    .messages({
-      "any.required": "Confirm Password is required",
-      "string.empty": "Confirm Password is required",
-      "any.only": "Password and Confirm Password fields don't match",
-    }),
+});
+
+export const changePwdSaveSchema = Joi.object({
+  ...passwordSchema,
 });
 
 /* Category schema */

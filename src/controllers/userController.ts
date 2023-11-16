@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
 import { API_STATUS } from "../config/constants";
-import { User } from "../models/User";
+import { User, UserModel } from "../models/User";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { IUser } from "../types/User";
@@ -11,7 +11,7 @@ import Handlebars from "handlebars";
 import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
 import { convertHtmlToText } from "../utils/helpers";
-import { ClientSession, startSession } from "mongoose";
+import { ClientSession, Document, startSession } from "mongoose";
 
 /* User sign up */
 export const signupSave = async (
@@ -223,6 +223,34 @@ export const resetPasswordSave = async (
     res.status(500).json({ status: API_STATUS.ERROR, error });
   } finally {
     session.endSession();
+  }
+};
+
+/* Change pwd DB save */
+export const changePasswordSave = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    /* DB save password  */
+    const { password } = req.body;
+    console.log("Request body", req.body, req.user);
+    if (!req.user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        error: `Invalid request.`,
+      });
+    }
+    (req.user as IUser).password = password;
+    const savedUser = await (req.user as Document).save();
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: savedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };
 

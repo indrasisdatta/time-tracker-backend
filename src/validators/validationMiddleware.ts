@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
+  changePwdSaveSchema,
   forgotPwdSchema,
   reportSearchSchema,
   resetPwdSaveSchema,
@@ -36,6 +37,9 @@ export const validationMiddleware = (op: string) => {
       case "reset_pwd":
         schema = resetPwdSaveSchema;
         break;
+      case "change_pwd":
+        schema = changePwdSaveSchema;
+        break;
     }
     if (!schema) {
       return res.status(400).json({
@@ -67,7 +71,7 @@ export const validationMiddleware = (op: string) => {
       }
       return res.status(400).json({
         status: API_STATUS.ERROR,
-        error: err,
+        error: [...new Set(err)],
       });
     }
   };

@@ -6,7 +6,7 @@ interface UserMethods {
   isValidPassword(password: string): Promise<boolean>;
 }
 
-interface UserModel extends Model<IUser, any, UserMethods, any> {
+export interface UserModel extends Model<IUser, any, UserMethods, any> {
   isExistingEmail(email: string): Promise<IUser | null>;
 }
 
