@@ -12,6 +12,7 @@ import {
 } from "./validationSchema";
 import { API_STATUS } from "../config/constants";
 import { logger } from "../utils/logger";
+import { removeFile } from "../utils/helpers";
 
 export const validationMiddleware = (op: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -60,6 +61,10 @@ export const validationMiddleware = (op: string) => {
       next();
     } catch (e: any) {
       logger.error(`validationResult exception:`, e);
+      if (req?.file?.filename) {
+        removeFile(req?.file?.filename);
+        removeFile(process.env.THUMB_PREFIX + req?.file?.filename);
+      }
       let err;
       if (e.hasOwnProperty("details")) {
         err = e.details.map((err: any) => {

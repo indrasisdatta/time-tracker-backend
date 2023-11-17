@@ -10,9 +10,10 @@ import { readFile, readFileSync } from "fs";
 import Handlebars from "handlebars";
 import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
-import { convertHtmlToText } from "../utils/helpers";
+import { convertHtmlToText, removeFile } from "../utils/helpers";
 import { ClientSession, Document, startSession } from "mongoose";
 import { generateThumbnail } from "../config/sharpConfig";
+import path from "path";
 
 /* User sign up */
 export const signupSave = async (
@@ -246,7 +247,7 @@ export const changePasswordSave = async (
     (req.user as IUser).password = password;
     const savedUser = await (req.user as Document).save();
 
-    return res.status(200).json({
+    res.status(200).json({
       status: API_STATUS.SUCCESS,
       data: savedUser,
     });
@@ -287,7 +288,15 @@ export const editProfileSave = async (
   next: NextFunction
 ) => {
   try {
-    const { user } = req;
+    const { user: jwtUser } = req;
+    if (!jwtUser) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: null,
+        error: "User not found",
+      });
+    }
+    const user = await User.findById((jwtUser as IUser)._id);
     if (!user) {
       return res.status(400).json({
         status: API_STATUS.ERROR,
@@ -296,19 +305,31 @@ export const editProfileSave = async (
       });
     }
     const { firstName, lastName, email } = req.body;
-    (user as IUser).firstName = firstName;
-    (user as IUser).lastName = lastName;
-    (user as IUser).email = email;
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.email = email;
     if (req.file) {
-      (user as IUser).profileImage = req.file.filename;
-      await generateThumbnail(req.file.buffer, 100, 100);
+      user.profileImage = req.file.filename;
+      const filepath = path.join(
+        process.env.FILE_UPLOAD_FOLDER!,
+        req.file.filename
+      );
+      await generateThumbnail(filepath, req.file.filename, 100, 100);
     }
-    const savedUser = await (user as unknown as Document).save();
-    return res.status(200).json({
+    const savedUser = await user.save();
+    res.status(200).json({
       status: API_STATUS.SUCCESS,
       data: savedUser,
     });
+    // next();
   } catch (error) {
+    logger.error("Exception caught: ", error);
+    console.log(error);
+    /* If any exception is thrown while saving, remove uploaded files */
+    if (req?.file?.filename) {
+      removeFile(req?.file?.filename);
+      removeFile(process.env.THUMB_PREFIX + req?.file?.filename);
+    }
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
 };

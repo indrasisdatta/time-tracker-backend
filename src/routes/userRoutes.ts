@@ -14,6 +14,7 @@ import { validationMiddleware } from "../validators/validationMiddleware";
 import passport from "../passport";
 import { Auth } from "../middlewares/Auth";
 import { multerConfig } from "../config/multerConfig";
+import { UserResponse } from "../middlewares/UserResponse";
 
 const router = Router();
 
@@ -46,7 +47,8 @@ router.post(
   Auth, // For user authentication
   multerConfig.single("profileImage"), // Middleware for file upload
   validationMiddleware("edit_profile"), // Input validation using Joi
-  editProfileSave
+  editProfileSave,
+  UserResponse // After middleware to format user response
 );
 router.get("/reset-password/:resetToken", resetPasswordTokenCheck);
 
