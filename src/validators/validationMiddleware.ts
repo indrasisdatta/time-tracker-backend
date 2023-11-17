@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
   changePwdSaveSchema,
+  editProfileSaveSchema,
   forgotPwdSchema,
   reportSearchSchema,
   resetPwdSaveSchema,
@@ -39,6 +40,9 @@ export const validationMiddleware = (op: string) => {
         break;
       case "change_pwd":
         schema = changePwdSaveSchema;
+        break;
+      case "edit_profile":
+        schema = editProfileSaveSchema;
         break;
     }
     if (!schema) {

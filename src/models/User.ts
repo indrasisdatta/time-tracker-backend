@@ -7,7 +7,7 @@ interface UserMethods {
 }
 
 export interface UserModel extends Model<IUser, any, UserMethods, any> {
-  isExistingEmail(email: string): Promise<IUser | null>;
+  isExistingEmail(email: string, _id?: string): Promise<IUser | null>;
 }
 
 const UserSchema = new Schema<IUser, UserModel, UserMethods>(
@@ -17,6 +17,7 @@ const UserSchema = new Schema<IUser, UserModel, UserMethods>(
     lastName: { type: "string" },
     password: { type: "string" },
     role: { type: "string", required: true },
+    profileImage: { type: "string", required: false },
   },
   { timestamps: true }
 );
@@ -28,8 +29,15 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-UserSchema.statics.isExistingEmail = async function (email: string) {
-  return await this.findOne({ email });
+UserSchema.statics.isExistingEmail = async function (
+  email: string,
+  id?: string
+) {
+  let condition: { email: string; _id?: any } = { email };
+  if (id) {
+    condition._id = { $ne: id };
+  }
+  return await this.findOne(condition);
 };
 
 UserSchema.methods.isValidPassword = async function (password: string) {

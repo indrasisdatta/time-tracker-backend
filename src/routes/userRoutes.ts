@@ -7,11 +7,13 @@ import {
   resetPasswordTokenCheck,
   resetPasswordSave,
   changePasswordSave,
+  editProfileSave,
 } from "../controllers/userController";
 
 import { validationMiddleware } from "../validators/validationMiddleware";
 import passport from "../passport";
 import { Auth } from "../middlewares/Auth";
+import { multerConfig } from "../config/multerConfig";
 
 const router = Router();
 
@@ -39,7 +41,13 @@ router.post(
   validationMiddleware("change_pwd"),
   changePasswordSave
 );
-
+router.post(
+  "/edit-profile",
+  Auth, // For user authentication
+  multerConfig.single("profileImage"), // Middleware for file upload
+  validationMiddleware("edit_profile"), // Input validation using Joi
+  editProfileSave
+);
 router.get("/reset-password/:resetToken", resetPasswordTokenCheck);
 
 export default router;

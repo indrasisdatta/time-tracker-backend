@@ -239,3 +239,37 @@ export const reportSearchSchema = Joi.object({
   subCategory: Joi.any().optional().allow(null, ""),
   sortBy: Joi.any().optional().allow(null, ""),
 });
+
+export const editProfileSaveSchema = Joi.object({
+  firstName: Joi.string().required().messages({
+    "any.required": "First name is required",
+    "string.empty": "First name is required",
+  }),
+  lastName: Joi.string().required().messages({
+    "any.required": "Last name is required",
+    "string.empty": "Last name is required",
+  }),
+  email: Joi.string()
+    .required()
+    .email()
+    .external(async (email, helpers) => {
+      logger.info(`Email Context:`, helpers.prefs.context);
+      if (
+        typeof helpers.prefs.context !== "undefined" &&
+        helpers.prefs.context?.req?.user
+      ) {
+        const userObj = helpers.prefs.context?.req?.user.toObject();
+        const isExisting = await User.isExistingEmail(email, userObj?._id);
+        if (isExisting) {
+          throw new Error("Email already exists");
+        }
+      }
+      return email;
+    })
+    .messages({
+      "any.required": "Email is required",
+      "string.empty": "Email is required",
+      "string.email": "Email format is invalid",
+    }),
+  profileImage: Joi.any().optional(),
+});

@@ -1,5 +1,7 @@
 import * as moment from "moment-timezone";
 import momentjs from "moment";
+import { unlink } from "fs";
+import { logger } from "./logger";
 
 type TimeSlot = {
   startTime: string;
@@ -97,4 +99,13 @@ export const getWeeksOfMonth = (year: number, month: number) => {
 
 export const convertHtmlToText = (str: string) => {
   return str.replace(/<[^>]+>/g, "");
+};
+
+export const removeFile = async (filepath: string) => {
+  await unlink(filepath, (err) => {
+    if (err) {
+      return logger.info(`Error removing file ${filepath} `, err);
+    }
+    logger.info("Deleted file: ", filepath);
+  });
 };

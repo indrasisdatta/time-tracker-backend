@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
 import { convertHtmlToText } from "../utils/helpers";
 import { ClientSession, Document, startSession } from "mongoose";
+import { generateThumbnail } from "../config/sharpConfig";
 
 /* User sign up */
 export const signupSave = async (
@@ -273,6 +274,39 @@ export const getUserProfile = async (
     return res.status(200).json({
       status: API_STATUS.SUCCESS,
       data: user,
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
+/* Edit profile */
+export const editProfileSave = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req;
+    if (!user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: null,
+        error: "User not found",
+      });
+    }
+    const { firstName, lastName, email } = req.body;
+    (user as IUser).firstName = firstName;
+    (user as IUser).lastName = lastName;
+    (user as IUser).email = email;
+    if (req.file) {
+      (user as IUser).profileImage = req.file.filename;
+      await generateThumbnail(req.file.buffer, 100, 100);
+    }
+    const savedUser = await (user as unknown as Document).save();
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: savedUser,
     });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
