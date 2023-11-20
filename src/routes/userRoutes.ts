@@ -34,7 +34,8 @@ router.post(
   "/change-password",
   Auth,
   validationMiddleware("change_pwd"),
-  changePasswordSave
+  changePasswordSave,
+  UserResponse
 );
 router.get("/profile", Auth, getUserProfile, UserResponse);
 router.post(
