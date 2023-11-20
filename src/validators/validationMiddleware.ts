@@ -1,13 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import {
   categorySchema,
+  changePwdSaveSchema,
+  editProfileSaveSchema,
+  forgotPwdSchema,
   reportSearchSchema,
+  resetPwdSaveSchema,
   signupUserSchema,
   timesheetSchema,
   timesheetSummarySchema,
 } from "./validationSchema";
 import { API_STATUS } from "../config/constants";
 import { logger } from "../utils/logger";
+import { removeFile } from "../utils/helpers";
 
 export const validationMiddleware = (op: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -28,6 +33,18 @@ export const validationMiddleware = (op: string) => {
       case "user_signup":
         schema = signupUserSchema;
         break;
+      case "forgot_pwd":
+        schema = forgotPwdSchema;
+        break;
+      case "reset_pwd":
+        schema = resetPwdSaveSchema;
+        break;
+      case "change_pwd":
+        schema = changePwdSaveSchema;
+        break;
+      case "edit_profile":
+        schema = editProfileSaveSchema;
+        break;
     }
     if (!schema) {
       return res.status(400).json({
@@ -44,6 +61,10 @@ export const validationMiddleware = (op: string) => {
       next();
     } catch (e: any) {
       logger.error(`validationResult exception:`, e);
+      if (req?.file?.filename) {
+        removeFile(req?.file?.filename);
+        removeFile(process.env.THUMB_PREFIX + req?.file?.filename);
+      }
       let err;
       if (e.hasOwnProperty("details")) {
         err = e.details.map((err: any) => {
@@ -59,7 +80,7 @@ export const validationMiddleware = (op: string) => {
       }
       return res.status(400).json({
         status: API_STATUS.ERROR,
-        error: err,
+        error: [...new Set(err)],
       });
     }
   };
