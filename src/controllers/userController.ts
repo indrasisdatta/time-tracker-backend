@@ -271,11 +271,11 @@ export const getUserProfile = async (
         error: "User not found",
       });
     }
-    // let tempUser = { ...user };
-    return res.status(200).json({
+    res.locals.apiResponse = {
       status: API_STATUS.SUCCESS,
       data: user,
-    });
+    };
+    next();
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
   }
@@ -317,14 +317,13 @@ export const editProfileSave = async (
       await generateThumbnail(filepath, req.file.filename, 100, 100);
     }
     const savedUser = await user.save();
-    res.status(200).json({
+    res.locals.apiResponse = {
       status: API_STATUS.SUCCESS,
       data: savedUser,
-    });
-    // next();
+    };
+    next();
   } catch (error) {
     logger.error("Exception caught: ", error);
-    console.log(error);
     /* If any exception is thrown while saving, remove uploaded files */
     if (req?.file?.filename) {
       removeFile(req?.file?.filename);

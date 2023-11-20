@@ -25,12 +25,6 @@ router.post(
   validationMiddleware("forgot_pwd"),
   forgotPwdAction
 );
-router.get(
-  "/profile",
-  // passport.authenticate("jwt", { session: false }),
-  Auth,
-  getUserProfile
-);
 router.post(
   "/reset-password",
   validationMiddleware("reset_pwd"),
@@ -42,6 +36,7 @@ router.post(
   validationMiddleware("change_pwd"),
   changePasswordSave
 );
+router.get("/profile", Auth, getUserProfile, UserResponse);
 router.post(
   "/edit-profile",
   Auth, // For user authentication
