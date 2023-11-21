@@ -3,6 +3,8 @@ import routes from "./routes";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "./utils/logger";
 import mongoose, { ConnectOptions } from "mongoose";
+import express from "express";
+import path from "path";
 
 logger.info(`DB connection string, port: ${JSON.stringify(process.env)} `);
 
@@ -38,9 +40,17 @@ app.get("/", (req: Request, res: Response) => {
   return res.send("App is running");
 });
 
+/* Access uploaded image */
+const uploadFolderName = process.env.FILE_UPLOAD_FOLDER?.replace("/", "");
+app.use(
+  `/${uploadFolderName}`,
+  express.static(path.join(__dirname, "..", uploadFolderName!))
+);
+
+/* URL routes */
 app.use("/", routes);
 
-// Custom error handling middleware for 500 errors
+/* Custom error handling middleware for 500 errors */
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error("Error found: ", err.stack);
   res.status(500).json({ status: "error", message: "Internal Server Error" });
