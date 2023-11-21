@@ -3,6 +3,7 @@ import momentjs from "moment";
 import { unlink } from "fs";
 import { logger } from "./logger";
 import path from "path";
+import { Request } from "express";
 
 type TimeSlot = {
   startTime: string;
@@ -110,4 +111,18 @@ export const removeFile = async (filename: string) => {
     }
     logger.info("Deleted file: ", filepath);
   });
+};
+
+export const userObjWithImageURL = (req: Request, tempUser: any) => {
+  if (tempUser.profileImage) {
+    let baseURL = req.protocol + "://" + req.get("host") + "/";
+    tempUser.profileImageThumb =
+      baseURL +
+      process.env.FILE_UPLOAD_FOLDER! +
+      process.env.THUMB_PREFIX! +
+      tempUser.profileImage;
+    tempUser.profileImage =
+      baseURL + process.env.FILE_UPLOAD_FOLDER + tempUser.profileImage;
+  }
+  return tempUser;
 };

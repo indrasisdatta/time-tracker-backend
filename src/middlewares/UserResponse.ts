@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { API_STATUS } from "../config/constants";
 import { logger } from "../utils/logger";
+import { userObjWithImageURL } from "../utils/helpers";
 
 export const UserResponse = (
   req: Request,
@@ -14,7 +15,7 @@ export const UserResponse = (
         typeof res.locals.apiResponse?.data === "object" &&
         res.locals.apiResponse?.data.constructor.modelName === "User"
       ) {
-        const tempUser = res.locals.apiResponse?.data.toObject();
+        let tempUser = res.locals.apiResponse?.data.toObject();
         /* Delete private fields */
         delete tempUser._id;
         delete tempUser.createdAt;
@@ -22,16 +23,7 @@ export const UserResponse = (
         delete tempUser.password;
         delete tempUser?.__v;
         /* Provide absolute URL for profile image */
-        if (tempUser.profileImage) {
-          let baseURL = req.protocol + "://" + req.get("host") + "/";
-          tempUser.profileImageThumb =
-            baseURL +
-            process.env.FILE_UPLOAD_FOLDER! +
-            process.env.THUMB_PREFIX! +
-            tempUser.profileImage;
-          tempUser.profileImage =
-            baseURL + process.env.FILE_UPLOAD_FOLDER + tempUser.profileImage;
-        }
+        tempUser = userObjWithImageURL(req, tempUser);
         return res.status(200).json({
           status: res.locals.apiResponse?.status,
           data: tempUser,
