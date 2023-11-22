@@ -42,10 +42,17 @@ app.get("/", (req: Request, res: Response) => {
 
 /* Access uploaded image */
 const uploadFolderName = process.env.FILE_UPLOAD_FOLDER?.replace("/", "");
-app.use(
-  `/${uploadFolderName}`,
-  express.static(path.join(__dirname, "..", uploadFolderName!))
-);
+if (process.env.ENVIRONMENT === "local") {
+  app.use(
+    `/${uploadFolderName}`,
+    express.static(path.join(__dirname, "../../", uploadFolderName!))
+  );
+} else {
+  app.use(
+    `/${uploadFolderName}`,
+    express.static(path.join(__dirname, "../", uploadFolderName!))
+  );
+}
 
 /* URL routes */
 app.use("/", routes);
