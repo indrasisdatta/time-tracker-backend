@@ -10,7 +10,11 @@ import { readFile, readFileSync } from "fs";
 import Handlebars from "handlebars";
 import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
-import { convertHtmlToText, removeFile } from "../utils/helpers";
+import {
+  convertHtmlToText,
+  removeFile,
+  userObjWithImageURL,
+} from "../utils/helpers";
 import { ClientSession, Document, startSession } from "mongoose";
 import { generateThumbnail } from "../config/sharpConfig";
 import path from "path";
@@ -89,7 +93,13 @@ export const signinUser = async (
       firstName,
       lastName,
       role,
-    }: { firstName: string; lastName: string; role: string } = {
+      profileImage,
+    }: {
+      firstName: string;
+      lastName: string;
+      role: string;
+      profileImage: string;
+    } = {
       ...user.toObject(),
     };
 
@@ -98,12 +108,13 @@ export const signinUser = async (
       data: {
         accessToken,
         refreshToken,
-        userInfo: {
+        userInfo: userObjWithImageURL(req, {
           firstName,
           lastName,
           email,
           role,
-        },
+          profileImage,
+        }),
       },
     });
   } catch (error) {
@@ -309,6 +320,12 @@ export const editProfileSave = async (
     user.lastName = lastName;
     user.email = email;
     if (req.file) {
+      /* Remove old image before uploading new one */
+      if (user.profileImage) {
+        removeFile(user.profileImage);
+        removeFile(process.env.THUMB_PREFIX + user.profileImage);
+      }
+      /* Set profile image name and generate thumb */
       user.profileImage = req.file.filename;
       const filepath = path.join(
         process.env.FILE_UPLOAD_FOLDER!,
