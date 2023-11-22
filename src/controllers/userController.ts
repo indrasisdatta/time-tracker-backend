@@ -320,6 +320,12 @@ export const editProfileSave = async (
     user.lastName = lastName;
     user.email = email;
     if (req.file) {
+      /* Remove old image before uploading new one */
+      if (user.profileImage) {
+        removeFile(user.profileImage);
+        removeFile(process.env.THUMB_PREFIX + user.profileImage);
+      }
+      /* Set profile image name and generate thumb */
       user.profileImage = req.file.filename;
       const filepath = path.join(
         process.env.FILE_UPLOAD_FOLDER!,
