@@ -52,6 +52,12 @@ if (process.env.ENVIRONMENT === "local") {
     `/${uploadFolderName}`,
     express.static(path.join(__dirname, "../", uploadFolderName!))
   );
+  /* Debugging live uploads path */
+  app.use(
+    `/uploads1`,
+    express.static(path.join(__dirname, "../../", "uploads"))
+  );
+  app.use(`/uploads2`, express.static(path.join(__dirname, "../", "uploads")));
 }
 
 /* URL routes */
