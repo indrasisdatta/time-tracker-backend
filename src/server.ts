@@ -5,6 +5,7 @@ import { logger } from "./utils/logger";
 import mongoose, { ConnectOptions } from "mongoose";
 import express from "express";
 import path from "path";
+import { existsSync } from "fs";
 
 logger.info(`DB connection string, port: ${JSON.stringify(process.env)} `);
 
@@ -43,6 +44,14 @@ app.get("/", (req: Request, res: Response) => {
 /* Access uploaded image */
 const uploadFolderName = process.env.FILE_UPLOAD_FOLDER?.replace("/", "");
 if (process.env.ENVIRONMENT === "local") {
+  app.use(`/uploads-exists/:fileName`, (req, res, next) => {
+    let fileName = req.params.fileName;
+    let exists = existsSync(
+      __dirname + "../../" + uploadFolderName! + fileName
+    );
+    logger.info("Upload Folder path exists: ", exists);
+    res.send(exists);
+  });
   app.use(
     `/${uploadFolderName}`,
     express.static(path.join(__dirname, "../../", uploadFolderName!))
@@ -52,12 +61,23 @@ if (process.env.ENVIRONMENT === "local") {
   //   `/${uploadFolderName}`,
   //   express.static(path.join(__dirname, "../", uploadFolderName!))
   // );
+  app.use(`/${uploadFolderName}`, (req, res, next) => {
+    express.static(path.join(__dirname, "../../", uploadFolderName!));
+  });
+  app.use(`/uploads-exists/:fileName`, (req, res, next) => {
+    let fileName = req.params.fileName;
+    let exists = existsSync(
+      __dirname + "../../" + uploadFolderName! + fileName
+    );
+    logger.info("Upload Folder path exists: ", exists);
+    res.send(exists);
+  });
   /* Debugging live uploads path */
-  app.use(
-    `/uploads1`,
-    express.static(path.join(__dirname, "../../", "uploads"))
-  );
-  app.use(`/uploads2`, express.static(path.join(__dirname, "../", "uploads")));
+  // app.use(
+  //   `/uploads1`,
+  //   express.static(path.join(__dirname, "../../", "uploads"))
+  // );
+  // app.use(`/uploads2`, express.static(path.join(__dirname, "../", "uploads")));
 }
 
 /* URL routes */

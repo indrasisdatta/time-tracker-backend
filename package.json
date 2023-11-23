@@ -9,8 +9,10 @@
     "test:unit": "cross-env NODE_ENV=local jest -c jest.unit.config.js",
     "test:int": "cross-env NODE_ENV=local jest -c jest.integration.config.js --maxWorkers=1 --forceExit",
     "copy-files": "cp -r ./uploads/ ./dist/",
+    "copy-files-win": "copy -r ./uploads/ ./dist/",
     "build": "npm run copy-files && cross-env NODE_ENV=local npx tsc",
     "build:prod": "npm run copy-files && cross-env NODE_ENV=production npx tsc",
+    "build:debug": "cross-env NODE_ENV=local npx tsc",
     "start-ts": "nodemon src/server.ts",
     "start": "node dist/src/server.js",
     "dev": "npm run copy-files && cross-env NODE_ENV=local concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js\" "
