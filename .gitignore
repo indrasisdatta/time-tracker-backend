@@ -1,7 +1,7 @@
 node_modules
 dist
 logs
-uploads
+uploads/*
 coverage
 .env.production
 .env.local
