@@ -115,7 +115,10 @@ export const removeFile = async (filename: string) => {
 
 export const userObjWithImageURL = (req: Request, tempUser: any) => {
   if (tempUser.profileImage) {
-    let baseURL = req.protocol + "://" + req.get("host") + "/";
+    // const protocol = req.protocol;
+    const protocol =
+      process.env.ENVIRONMENT === "local" ? "http://" : "https://";
+    let baseURL = protocol + req.get("host") + "/";
     tempUser.profileImageThumb =
       baseURL +
       process.env.FILE_UPLOAD_FOLDER! +
