@@ -59,8 +59,11 @@ app.use("/", routes);
 
 /* Custom error handling middleware for 500 errors */
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log("Error caught! ", err);
   logger.error("Error found: ", err.stack);
-  res.status(500).json({ status: "error", message: "Internal Server Error" });
+  res
+    .status(500)
+    .json({ status: "error", message: "Internal Server Error", error: err });
 });
 
 export const conn = app.listen(port, () => {
