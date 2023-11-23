@@ -43,42 +43,36 @@ app.get("/", (req: Request, res: Response) => {
 
 /* Access uploaded image */
 const uploadFolderName = process.env.FILE_UPLOAD_FOLDER?.replace("/", "");
-if (process.env.ENVIRONMENT === "local") {
-  app.use(`/uploads-exists/:fileName`, (req, res, next) => {
-    let fileName = req.params.fileName;
-    let exists = existsSync(
-      __dirname + "../../" + uploadFolderName! + fileName
-    );
-    logger.info("Upload Folder path exists: ", exists);
-    res.send(exists);
-  });
-  app.use(
-    `/${uploadFolderName}`,
-    express.static(path.join(__dirname, "../../", uploadFolderName!))
-  );
-} else {
-  // app.use(
-  //   `/${uploadFolderName}`,
-  //   express.static(path.join(__dirname, "../", uploadFolderName!))
-  // );
-  app.use(`/${uploadFolderName}`, (req, res, next) => {
-    express.static(path.join(__dirname, "../../", uploadFolderName!));
-  });
-  app.use(`/uploads-exists/:fileName`, (req, res, next) => {
-    let fileName = req.params.fileName;
-    let exists = existsSync(
-      __dirname + "../../" + uploadFolderName! + fileName
-    );
-    logger.info("Upload Folder path exists: ", exists);
-    res.send(exists);
-  });
-  /* Debugging live uploads path */
-  // app.use(
-  //   `/uploads1`,
-  //   express.static(path.join(__dirname, "../../", "uploads"))
-  // );
-  // app.use(`/uploads2`, express.static(path.join(__dirname, "../", "uploads")));
-}
+app.use(
+  `/${uploadFolderName}`,
+  express.static(path.join(__dirname, "../../", uploadFolderName!))
+);
+// if (process.env.ENVIRONMENT === "local") {
+//   /* Uploads folder path */
+//   app.use(
+//     `/${uploadFolderName}`,
+//     express.static(path.join(__dirname, "../../", uploadFolderName!))
+//   );
+// } else {
+//   /* Uploads folder path */
+//   app.use(`/${uploadFolderName}`, (req, res, next) => {
+//     express.static(path.join(__dirname, "../../", uploadFolderName!));
+//   });
+// }
+
+/* Check if file exists */
+app.use(`/uploads-exists/:fileName`, (req, res, next) => {
+  let fileName = req.params.fileName;
+  let filePath = `${__dirname}${path.sep}..${path.sep}..${
+    path.sep
+  }${uploadFolderName!}${path.sep}${fileName}`;
+  logger.info("Upload Folder path: " + filePath);
+  console.log("Upload Folder path: ", filePath);
+  let exists = existsSync(filePath);
+  logger.info("Folder exists: " + exists);
+  console.log("Folder exists: ", exists);
+  res.send(exists);
+});
 
 /* URL routes */
 app.use("/", routes);
