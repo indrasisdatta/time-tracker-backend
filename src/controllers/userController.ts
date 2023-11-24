@@ -83,6 +83,48 @@ export const signinUser = async (
   }
 };
 
+export const regenerateTokens = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req;
+    if (!user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: null,
+        error: "Invalid request",
+      });
+    }
+    /* Valid user, so generate access and refresh token */
+    const accessToken = jwt.sign(
+      {
+        id: (user as IUser)._id,
+        email: (user as IUser).email,
+        expire: Date.now() + 60,
+        // expire: Date.now() + 3600 * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY),
+      },
+      process.env.JWT_SECRET!
+    );
+    const refreshToken = jwt.sign(
+      {
+        id: (user as IUser)._id,
+        email: (user as IUser).email,
+        expire: Date.now() + 600 * Number(process.env.JWT_REFRESH_TOKEN_EXPIRY),
+      },
+      process.env.JWT_SECRET!
+    );
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: { accessToken, refreshToken },
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
 export const getUserProfile = async (
   req: Request,
   res: Response,
