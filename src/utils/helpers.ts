@@ -1,5 +1,9 @@
 import * as moment from "moment-timezone";
 import momentjs from "moment";
+import { unlink } from "fs";
+import { logger } from "./logger";
+import path from "path";
+import { Request } from "express";
 
 type TimeSlot = {
   startTime: string;
@@ -93,4 +97,35 @@ export const getWeeksOfMonth = (year: number, month: number) => {
     startDate.setDate(startDate.getDate() + 7);
   }
   return weeks;
+};
+
+export const convertHtmlToText = (str: string) => {
+  return str.replace(/<[^>]+>/g, "");
+};
+
+export const removeFile = async (filename: string) => {
+  const filepath = path.join(process.env.FILE_UPLOAD_FOLDER!, filename);
+  await unlink(filepath, (err) => {
+    if (err) {
+      return logger.info(`Error removing file ${filepath} `, err);
+    }
+    logger.info("Deleted file: ", filepath);
+  });
+};
+
+export const userObjWithImageURL = (req: Request, tempUser: any) => {
+  if (tempUser.profileImage) {
+    // const protocol = req.protocol;
+    const protocol =
+      process.env.ENVIRONMENT === "local" ? "http://" : "https://";
+    let baseURL = protocol + req.get("host") + "/";
+    tempUser.profileImageThumb =
+      baseURL +
+      process.env.FILE_UPLOAD_FOLDER! +
+      process.env.THUMB_PREFIX! +
+      tempUser.profileImage;
+    tempUser.profileImage =
+      baseURL + process.env.FILE_UPLOAD_FOLDER + tempUser.profileImage;
+  }
+  return tempUser;
 };

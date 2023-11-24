@@ -16,7 +16,7 @@ export const Auth = (req: Request, res: Response, next: NextFunction) => {
         });
       }
       req.user = user;
-      next();
+      return next();
     }
   )(req, res, next);
 };

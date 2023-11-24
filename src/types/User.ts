@@ -5,4 +5,5 @@ export interface IUser {
   lastName: string;
   password: string;
   role: "admin" | "end_user";
+  profileImage?: string;
 }
