@@ -13,13 +13,13 @@ import {
 
 import { validationMiddleware } from "../validators/validationMiddleware";
 // import passport from "../passport";
-import { Auth } from "../middlewares/Auth";
+import { Auth, AuthRefreshToken } from "../middlewares/Auth";
 import { multerConfig } from "../config/multerConfig";
 import { UserResponse } from "../middlewares/UserResponse";
 
 const router = Router();
 
-router.get("/regenerate-token", Auth, regenerateTokens);
+router.get("/regenerate-token", AuthRefreshToken, regenerateTokens);
 router.post("/signup", validationMiddleware("user_signup"), signupSave);
 router.post("/login", signinUser);
 router.post(
