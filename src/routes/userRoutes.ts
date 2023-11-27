@@ -3,6 +3,7 @@ import {
   signupSave,
   signinUser,
   getUserProfile,
+  regenerateTokens,
   forgotPwdAction,
   resetPasswordTokenCheck,
   resetPasswordSave,
@@ -11,13 +12,14 @@ import {
 } from "../controllers/userController";
 
 import { validationMiddleware } from "../validators/validationMiddleware";
-import passport from "../passport";
-import { Auth } from "../middlewares/Auth";
+// import passport from "../passport";
+import { Auth, AuthRefreshToken } from "../middlewares/Auth";
 import { multerConfig } from "../config/multerConfig";
 import { UserResponse } from "../middlewares/UserResponse";
 
 const router = Router();
 
+router.get("/regenerate-token", AuthRefreshToken, regenerateTokens);
 router.post("/signup", validationMiddleware("user_signup"), signupSave);
 router.post("/login", signinUser);
 router.post(

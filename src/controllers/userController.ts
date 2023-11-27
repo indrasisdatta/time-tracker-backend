@@ -2,16 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
 import { API_STATUS } from "../config/constants";
 import { User, UserModel } from "../models/User";
-import passport from "passport";
+// import passport from "passport";
 import jwt from "jsonwebtoken";
 import { IUser } from "../types/User";
 import { Mailer } from "../utils/mailer";
-import { readFile, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import Handlebars from "handlebars";
 import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
 import {
   convertHtmlToText,
+  generateUserTokens,
   removeFile,
   userObjWithImageURL,
 } from "../utils/helpers";
@@ -71,23 +72,7 @@ export const signinUser = async (
       });
     }
     /* Valid user, so generate access and refresh token */
-    const accessToken = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        expire: Date.now() + 3600 * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY),
-      },
-      process.env.JWT_SECRET!
-    );
-    const refreshToken = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        expire:
-          Date.now() + 3600 * Number(process.env.JWT_REFRESH_TOKEN_EXPIRY),
-      },
-      process.env.JWT_SECRET!
-    );
+    const { accessToken, refreshToken } = generateUserTokens(user);
 
     const {
       firstName,
@@ -261,6 +246,32 @@ export const changePasswordSave = async (
     res.status(200).json({
       status: API_STATUS.SUCCESS,
       data: savedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ status: API_STATUS.ERROR, error });
+  }
+};
+
+export const regenerateTokens = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req;
+    if (!user) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: null,
+        error: "Invalid request",
+      });
+    }
+    /* Valid user, so generate access and refresh token */
+    const { accessToken, refreshToken } = generateUserTokens(user as IUser);
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: { accessToken, refreshToken },
     });
   } catch (error) {
     res.status(500).json({ status: API_STATUS.ERROR, error });
