@@ -11,24 +11,37 @@ import { validationMiddleware } from "../validators/validationMiddleware";
 import { Auth } from "../middlewares/Auth";
 
 const router = Router();
-router.post("/save", Auth, validationMiddleware("timesheet"), saveTimesheet);
-router.get("/weekly_time/:yearMonth", Auth, getWeeklyProductiveTime);
-router.get("/:date", Auth, getDailyRecords);
+router.post(
+  "/save",
+  // Auth,
+  validationMiddleware("timesheet"),
+  saveTimesheet
+);
+router.get(
+  "/weekly_time/:yearMonth",
+  // Auth,
+  getWeeklyProductiveTime
+);
+router.get(
+  "/:date",
+  // Auth,
+  getDailyRecords
+);
 router.post(
   "/summary",
-  Auth,
+  // Auth,
   validationMiddleware("timesheet_summary"),
   getTimesheetSummary
 );
 router.post(
   "/calendar",
-  Auth,
+  // Auth,
   validationMiddleware("timesheet_summary"),
   timesheetCalendar
 );
 router.post(
   "/report",
-  Auth,
+  // Auth,
   validationMiddleware("report_search"),
   getReportData
 );

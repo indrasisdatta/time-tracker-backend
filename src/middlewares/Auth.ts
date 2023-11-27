@@ -7,7 +7,7 @@ import { IUser } from "../types/User";
 export const Auth = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate(
     // "jwt",
-    "x-access-token",
+    process.env.JWT_ACCESS_TOKEN_KEY!,
     { session: false },
     async (error: Error, user: IUser) => {
       console.log("Auth response middleware: ", error, user);
@@ -32,7 +32,7 @@ export const AuthRefreshToken = (
 ) => {
   passport.authenticate(
     // "jwt",
-    "x-refresh-token",
+    process.env.JWT_REFRESH_TOKEN_KEY!,
     { session: false },
     async (error: Error, user: IUser) => {
       console.log("AuthRefreshToken response middleware: ", error, user);

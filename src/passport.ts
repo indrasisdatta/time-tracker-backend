@@ -31,7 +31,7 @@ import { Request } from "express";
 // );
 
 passport.use(
-  "x-access-token",
+  process.env.JWT_ACCESS_TOKEN_KEY!,
   new JwtStrategy(
     {
       // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -59,10 +59,10 @@ passport.use(
 );
 
 passport.use(
-  "x-refresh-token",
+  process.env.JWT_REFRESH_TOKEN_KEY!,
   new JwtStrategy(
     {
-      // jwtFromRequest: ExtractJwt.fromHeader("x-refresh-token"),
+      // jwtFromRequest: ExtractJwt.fromHeader(process.env.JWT_REFRESH_TOKEN_KEY!),
       jwtFromRequest: tokenExtractor,
       secretOrKey: process.env.JWT_SECRET,
     },
@@ -93,8 +93,8 @@ function tokenExtractor(req: Request) {
       let scheme = parts[0],
         credentials = parts[1];
       if (
-        /^x-access-token$/i.test(scheme) ||
-        /^x-refresh-token$/i.test(scheme)
+        scheme.includes(process.env.JWT_REFRESH_TOKEN_KEY!) ||
+        scheme.includes(process.env.JWT_ACCESS_TOKEN_KEY!)
       ) {
         token = credentials;
       }

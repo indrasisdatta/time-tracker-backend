@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ResetPwdToken } from "../models/ResetPwdToken";
 import {
   convertHtmlToText,
+  generateUserTokens,
   removeFile,
   userObjWithImageURL,
 } from "../utils/helpers";
@@ -71,16 +72,7 @@ export const signinUser = async (
       });
     }
     /* Valid user, so generate access and refresh token */
-    const userJwtObj = {
-      id: (user as IUser)._id,
-      email: (user as IUser).email,
-    };
-    const accessToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
-      expiresIn: "60s",
-    });
-    const refreshToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
-      expiresIn: "300s",
-    });
+    const { accessToken, refreshToken } = generateUserTokens(user);
 
     const {
       firstName,
@@ -275,16 +267,7 @@ export const regenerateTokens = async (
       });
     }
     /* Valid user, so generate access and refresh token */
-    const userJwtObj = {
-      id: (user as IUser)._id,
-      email: (user as IUser).email,
-    };
-    const accessToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
-      expiresIn: "60s",
-    });
-    const refreshToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
-      expiresIn: "300s",
-    });
+    const { accessToken, refreshToken } = generateUserTokens(user as IUser);
 
     return res.status(200).json({
       status: API_STATUS.SUCCESS,

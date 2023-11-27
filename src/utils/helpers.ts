@@ -4,6 +4,8 @@ import { unlink } from "fs";
 import { logger } from "./logger";
 import path from "path";
 import { Request } from "express";
+import { IUser } from "../types/User";
+import jwt from "jsonwebtoken";
 
 type TimeSlot = {
   startTime: string;
@@ -128,4 +130,18 @@ export const userObjWithImageURL = (req: Request, tempUser: any) => {
       baseURL + process.env.FILE_UPLOAD_FOLDER + tempUser.profileImage;
   }
   return tempUser;
+};
+
+export const generateUserTokens = (user: IUser) => {
+  const userJwtObj = {
+    id: (user as IUser)._id,
+    email: (user as IUser).email,
+  };
+  const accessToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY,
+  });
+  const refreshToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY,
+  });
+  return { accessToken, refreshToken };
 };
