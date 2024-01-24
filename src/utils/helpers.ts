@@ -90,7 +90,13 @@ export const getWeeksOfMonth = (year: number, month: number) => {
   const lastDayOfMonth = new Date(year, month + 1, 0);
   const weeks = [];
   /* Loop till end of month and create weeks array with start and end date */
-  while (startDate.getMonth() <= lastDayOfMonth.getMonth()) {
+  // while (startDate.getMonth() <= lastDayOfMonth.getMonth()) {
+
+  while (
+    startDate.getFullYear() === lastDayOfMonth.getFullYear() &&
+    startDate.getMonth() <= lastDayOfMonth.getMonth() &&
+    startDate <= lastDayOfMonth
+  ) {
     const nextDate = getNextFriday(startDate);
     weeks.push({
       start: `${momentjs(startDate).format("YYYY-MM-DD")} 00:00:00+000`,

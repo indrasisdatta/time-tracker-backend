@@ -15,7 +15,7 @@
     "build:debug": "cross-env NODE_ENV=local npx tsc",
     "start-ts": "nodemon src/server.ts",
     "start": "node dist/src/server.js",
-    "dev": "npm run copy-files && cross-env NODE_ENV=local concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js\" "
+    "dev": "npm run copy-files && cross-env NODE_ENV=local concurrently \"npx tsc --watch\" \"nodemon -q dist/src/server.js --max-old-space-size=4096\" "
   },
   "keywords": [],
   "author": "",
