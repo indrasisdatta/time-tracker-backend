@@ -203,3 +203,8 @@ db.timesheets.update(
     }],
     { multi: true }
 )
+
+/* DB indexes */
+
+db.timesheets.createIndex( { timesheetDate : 1 } );
+db.timesheets.createIndex( { startDate : 1, endDate: 1 } );
