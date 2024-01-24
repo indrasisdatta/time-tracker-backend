@@ -152,5 +152,54 @@ db.timesheets.aggregate([
     }
 ])
 
+/* Weekly hrs */
+db.getCollection("timesheets").aggregate([
+    {
+        "$match":{
+            "timesheetDate":{
+                "$gte":new Date("2023-09-18T00:00:00.000Z"),
+                "$lte":new Date("2023-09-22T00:00:00.000Z")
+            },
+            "isProductive":true
+        }
+    },
+    {
+        "$group": {
+            "_id": {$week: "$timesheetDate"},
+            "distinctDates": {$addToSet: "$timesheetDate"},
+            "week":{"$first":{"start":"2023-09-18 00:00:00+000","end":"2023-09-22 00:00:00+000"}},         
+            "totalProductive":{
+                "$sum":{
+                    "$dateDiff":{"startDate":"$startTime","endDate":"$endTime","unit":"minute"}
+                }
+            }            
+        }        
+    },
+    {
+            "$group": {
+                "_id": null,
+                totalProductiveMins: {$first: "$totalProductive"},
+                "workingDays": {
+                    $sum: {$size: "$distinctDates"}
+                }
+            }
+        }
+])
 
+/* UPDATE TIMSHEET subCategory datatype from string to ObjectId */
 
+db.timesheets.update(
+    {},
+    [{
+        $set: {
+            subCategory: {
+              $convert: {
+                    input: "$subCategory",
+                    to: "objectId",
+                    onError: null
+                }
+            }
+        }
+    }],
+    { multi: true }
+)

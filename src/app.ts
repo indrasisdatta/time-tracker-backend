@@ -8,6 +8,8 @@ import * as swaggerDocument from "./swagger.json";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
+import passport from "./passport";
+
 const app: Express = express();
 
 let corsConfig = {};
@@ -26,6 +28,7 @@ if (process.env.NODE_ENV === "local") {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsConfig));
+app.use(passport.initialize());
 
 /* Swagger API */
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));

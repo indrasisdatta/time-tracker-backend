@@ -1,4 +1,11 @@
 import * as moment from "moment-timezone";
+import momentjs from "moment";
+import { unlink } from "fs";
+import { logger } from "./logger";
+import path from "path";
+import { Request } from "express";
+import { IUser } from "../types/User";
+import jwt from "jsonwebtoken";
 
 type TimeSlot = {
   startTime: string;
@@ -56,4 +63,85 @@ export const convertDatetUTCString = (timesheetDate: string, time: any) => {
   // const utcDateTime = new Date(localDateTime.toDate()).toUTCString();
   // console.log("UTC date time:", utcDateTime);
   // return utcDateTime;
+};
+
+/* Calculate next Friday */
+const getNextFriday = (date = new Date()) => {
+  const dateCopy = new Date(date.getTime());
+  const nextFriday = new Date(
+    dateCopy.setDate(
+      dateCopy.getDate() + ((7 - dateCopy.getDay() + 5) % 7 || 7)
+    )
+  );
+  return nextFriday;
+};
+
+/**
+ * Return weeks of month with start and end dates
+ * @param year
+ * @param month
+ * @returns weeks [ {start, end}, {start, end} ]
+ */
+export const getWeeksOfMonth = (year: number, month: number) => {
+  const startDate = new Date(year, month, 1);
+  /* Day starts on Monday of this week (even if it's end of prev month) */
+  startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+  /* Last day of month 28/20/31 */
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const weeks = [];
+  /* Loop till end of month and create weeks array with start and end date */
+  while (startDate.getMonth() <= lastDayOfMonth.getMonth()) {
+    const nextDate = getNextFriday(startDate);
+    weeks.push({
+      start: `${momentjs(startDate).format("YYYY-MM-DD")} 00:00:00+000`,
+      end: `${momentjs(nextDate).format("YYYY-MM-DD")} 00:00:00+000`,
+    });
+    startDate.setDate(startDate.getDate() + 7);
+  }
+  return weeks;
+};
+
+export const convertHtmlToText = (str: string) => {
+  return str.replace(/<[^>]+>/g, "");
+};
+
+export const removeFile = async (filename: string) => {
+  const filepath = path.join(process.env.FILE_UPLOAD_FOLDER!, filename);
+  await unlink(filepath, (err) => {
+    if (err) {
+      return logger.info(`Error removing file ${filepath} `, err);
+    }
+    logger.info("Deleted file: ", filepath);
+  });
+};
+
+export const userObjWithImageURL = (req: Request, tempUser: any) => {
+  if (tempUser.profileImage) {
+    // const protocol = req.protocol;
+    const protocol =
+      process.env.ENVIRONMENT === "local" ? "http://" : "https://";
+    let baseURL = protocol + req.get("host") + "/";
+    tempUser.profileImageThumb =
+      baseURL +
+      process.env.FILE_UPLOAD_FOLDER! +
+      process.env.THUMB_PREFIX! +
+      tempUser.profileImage;
+    tempUser.profileImage =
+      baseURL + process.env.FILE_UPLOAD_FOLDER + tempUser.profileImage;
+  }
+  return tempUser;
+};
+
+export const generateUserTokens = (user: IUser) => {
+  const userJwtObj = {
+    id: (user as IUser)._id,
+    email: (user as IUser).email,
+  };
+  const accessToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY,
+  });
+  const refreshToken = jwt.sign(userJwtObj, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY,
+  });
+  return { accessToken, refreshToken };
 };

@@ -2,14 +2,15 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../utils/logger";
 import { Timesheet } from "../models/Timesheet";
 
-import mongoose, { ClientSession } from "mongoose";
+import mongoose, { ClientSession, Types } from "mongoose";
 import { API_STATUS } from "../config/constants";
 // import moment from "moment-timezone";
-import { ITimesheet } from "../types/Timesheet";
+import { ITimesheet, ReportCondition } from "../types/Timesheet";
 import {
   // convertDatetUTC,
   convertDatetUTCString,
   convertDatetoLocalTZ,
+  getWeeksOfMonth,
 } from "../utils/helpers";
 import moment from "moment";
 
@@ -119,6 +120,7 @@ export const getDailyRecords = async (
         "category subCategory comments timesheetDate startTime endTime startTimeLocal endTimeLocal isProductive"
       )
       .populate("category", "name description subCategories")
+      .sort({ startTime: "asc" })
       .exec();
 
     if (records) {
@@ -253,6 +255,158 @@ export const timesheetCalendar = async (
     return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
   } catch (error) {
     logger.error("Calendar error: ", error);
+    return res.status(500).json({
+      status: API_STATUS.ERROR,
+      data: [],
+      error,
+    });
+  }
+};
+
+export const getWeeklyProductiveTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { yearMonth } = req.params;
+    if (!yearMonth) {
+      return res.status(400).json({
+        status: API_STATUS.ERROR,
+        data: [],
+        error: "Missing year month param",
+      });
+    }
+    const [yy, mm] = yearMonth.split("-");
+    const weeksArr = getWeeksOfMonth(+yy, +mm - 1);
+    let response: any = [];
+    if (weeksArr && weeksArr.length > 0) {
+      // weeksArr.map((week) => {
+      for (let week of weeksArr) {
+        let records = await Timesheet.aggregate([
+          {
+            $match: {
+              timesheetDate: {
+                $gte: new Date(week.start),
+                $lte: new Date(week.end),
+              },
+              isProductive: true,
+            },
+          },
+          {
+            $group: {
+              // _id: "$timesheetDate",
+              _id: { $week: "$timesheetDate" },
+              distinctDates: { $addToSet: "$timesheetDate" },
+              week: { $first: week },
+              totalProductive: {
+                $sum: {
+                  $dateDiff: {
+                    startDate: "$startTime",
+                    endDate: "$endTime",
+                    unit: "minute",
+                  },
+                },
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              week: { $first: week },
+              totalProductiveMins: { $first: "$totalProductive" },
+              workingDays: {
+                $sum: { $size: "$distinctDates" },
+              },
+            },
+          },
+        ]);
+        response = [...response, ...records];
+      }
+    }
+
+    return res.status(200).json({
+      status: API_STATUS.SUCCESS,
+      data: response,
+      error: null,
+    });
+  } catch (error) {
+    logger.error("Calendar error: ", error);
+    return res.status(500).json({
+      status: API_STATUS.ERROR,
+      data: [],
+      error,
+    });
+  }
+};
+
+/* Report search info */
+export const getReportData = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { startDate, endDate, category, subCategory, sortBy } = req.body;
+    const conditions: any = {
+      timesheetDate: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      },
+    };
+    let sortCriteria: any = { totalTime: -1 };
+    if (sortBy) {
+      sortCriteria = {
+        [sortBy.field]: sortBy.type === "asc" ? 1 : -1,
+      };
+    }
+    if (category) {
+      conditions.category = new Types.ObjectId(category);
+    }
+    if (subCategory) {
+      conditions.subCategory = new Types.ObjectId(subCategory);
+    }
+
+    const timesheetSummary = await Timesheet.aggregate([
+      { $match: conditions },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+      },
+      {
+        $group: {
+          _id: "$subCategory",
+          categoryData: { $first: "$categoryData" },
+          subCategory: { $first: "$subCategory" },
+          totalTime: {
+            $sum: {
+              $dateDiff: {
+                startDate: "$startTime",
+                endDate: "$endTime",
+                unit: "minute",
+              },
+            },
+          },
+        },
+      },
+      { $unwind: "$categoryData" },
+      {
+        $sort: sortCriteria,
+      },
+    ]);
+
+    if (timesheetSummary) {
+      return res
+        .status(200)
+        .json({ status: API_STATUS.SUCCESS, data: timesheetSummary });
+    }
+    return res.status(500).json({ status: API_STATUS.SUCCESS, data: [] });
+  } catch (error) {
+    logger.info("Summary error: ", error);
     return res.status(500).json({
       status: API_STATUS.ERROR,
       data: [],

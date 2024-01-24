@@ -1,10 +1,14 @@
 ### Backend for Time tracker app using:
 
 - NodeJS (Typescript), Express
-- MongoDB
+- MongoDB, Mongoose ODM
 - [Swagger](https://nerd-corner.com/import-swagger-in-node-typescript-project/) for API doc 
 - Jest for [unit testing](https://losikov.medium.com/part-4-node-js-express-typescript-unit-tests-with-jest-5204414bf6f0) and [integration testing](https://javascript.plainenglish.io/beginners-guide-to-testing-jest-with-node-typescript-1f46a1b87dad)
 - [Docker configuration](https://sachithsiriwardana.medium.com/dockerizing-nodejs-application-with-multi-stage-build-e30477ca572)
+- Send email using [Nodemailer](https://nodemailer.com/) and [Handlebars](https://www.npmjs.com/package/handlebars)
+- Validation schema, rules using [Joi](https://www.npmjs.com/package/joi)
+- File upload using [Multer](https://www.npmjs.com/package/multer) and [Sharp](https://www.npmjs.com/package/sharp)
+- JWT authentication using [Passport](https://www.npmjs.com/package/passport)
 
 ### Steps to run:
 1. Create env files and set env vars as necessary (eg. DB_CON_STR)  
