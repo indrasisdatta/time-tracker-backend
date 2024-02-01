@@ -213,7 +213,7 @@ export const timesheetCalendar = async (
         $match: {
           timesheetDate: {
             $gte: new Date(startDate),
-            $lt: new Date(endDate),
+            $lte: new Date(endDate),
           },
           isProductive: true,
         },
@@ -243,7 +243,7 @@ export const timesheetCalendar = async (
       },
       /* Sort in asc */
       {
-        $sort: { timesheetDate: 1 },
+        $sort: { timesheetDate: -1 },
       },
     ]);
 
